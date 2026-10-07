@@ -24,7 +24,7 @@ _fuente/                 ← NO va a git: copia de Drive, capturas, scripts de p
 
 - `npm run build` genera `dist/`. `npm run dev` lo genera y lo sirve en http://localhost:5190.
 - El build **falla** si un proyecto apunta a una imagen que no existe (así no se publica nada roto).
-- La URL pública se define con la variable `SITE_URL` (por defecto `https://alquimista-digital.pages.dev`).
+- La URL pública se define con la variable `SITE_URL` (por defecto `https://alejandrohurtadomartin.pages.dev`).
 
 ### Tipos de galería (`galeria[].tipo` en proyectos.mjs)
 `img` (captura ampliable) · `scroll` (pantalla larga que se recorre al pasar el cursor) · `grid` (mosaico; con `movil: true` se muestran en teléfonos) · `video` / `videos` (vertical con portada) · `zoom` (tablero enorme para ampliar) · `copy` (textos publicitarios) · `insights` (cifras + citas) · `stickers` · `fotos`.

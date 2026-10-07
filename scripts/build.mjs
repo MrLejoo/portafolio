@@ -8,7 +8,7 @@ import { perfil, disciplinas, proyectos } from '../src/data/proyectos.mjs';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SRC = join(ROOT, 'src');
 const OUT = join(ROOT, 'dist');
-const SITE = (process.env.SITE_URL || 'https://alquimista-digital.pages.dev').replace(/\/$/, '');
+const SITE = (process.env.SITE_URL || 'https://alejandrohurtadomartin.pages.dev').replace(/\/$/, '');
 const VERSION = Date.now().toString(36);
 
 const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
