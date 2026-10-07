@@ -1,6 +1,7 @@
 // Genera el sitio estático en dist/ a partir de src/.
 // Uso: node scripts/build.mjs   (Cloudflare Pages ejecuta este mismo comando en cada push)
 import { readFileSync, writeFileSync, mkdirSync, rmSync, cpSync, existsSync, readdirSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { perfil, disciplinas, proyectos } from '../src/data/proyectos.mjs';
@@ -9,13 +10,58 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SRC = join(ROOT, 'src');
 const OUT = join(ROOT, 'dist');
 const SITE = (process.env.SITE_URL || 'https://alejandrohurtadomartin.pages.dev').replace(/\/$/, '');
-const VERSION = Date.now().toString(36);
 
 const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const pad = n => String(n).padStart(2, '0');
 const bySlug = Object.fromEntries(proyectos.map(p => [p.slug, p]));
 const missing = new Set();
-const asset = src => { if (src && !existsSync(join(SRC, src))) missing.add(src); return src; };
+const md5 = buf => createHash('md5').update(buf).digest('hex').slice(0, 10);
+
+/* Recursos con huella --------------------------------------------------- *
+ * Todo lo de /assets se sirve con caché de un año (ver src/static/_headers).
+ * Para que un cambio llegue al instante, cada URL lleva ?v=<huella del contenido>:
+ * si el archivo cambia, cambia la URL; si no cambia, el visitante reutiliza su caché. */
+const hashes = new Map();
+const asset = src => {
+  if (!src) return src;
+  if (!existsSync(join(SRC, src))) { missing.add(src); return src; }
+  if (!hashes.has(src)) hashes.set(src, md5(readFileSync(join(SRC, src))));
+  return `${src}?v=${hashes.get(src)}`;
+};
+
+// Ancho y alto de un WebP leyendo solo su cabecera (sin dependencias).
+const dimsCache = new Map();
+function dims(src) {
+  if (dimsCache.has(src)) return dimsCache.get(src);
+  let d = null;
+  try {
+    const b = readFileSync(join(SRC, src));
+    const tipo = b.toString('ascii', 12, 16);
+    if (tipo === 'VP8X') d = [1 + b.readUIntLE(24, 3), 1 + b.readUIntLE(27, 3)];
+    else if (tipo === 'VP8 ') d = [b.readUInt16LE(26) & 0x3fff, b.readUInt16LE(28) & 0x3fff];
+    else if (tipo === 'VP8L') d = [1 + (((b[22] & 0x3f) << 8) | b[21]), 1 + (((b[24] & 0x0f) << 10) | (b[23] << 2) | ((b[22] & 0xc0) >> 6))];
+  } catch { /* se informa como faltante en asset() */ }
+  dimsCache.set(src, d);
+  return d;
+}
+
+// <img> con huella, tamaño declarado (evita saltos al cargar) y srcset si existe la versión de 800 px.
+const SIZES = {
+  card: '(max-width: 640px) 92vw, (max-width: 960px) 46vw, 700px',
+  cover: '(max-width: 1240px) 92vw, 1160px',
+  wide: '(max-width: 960px) 92vw, 900px',
+  half: '(max-width: 640px) 92vw, 450px',
+  next: '(max-width: 760px) 92vw, 500px',
+};
+function img(src, { alt = '', sizes, lazy = true, priority = false, extra = '' } = {}) {
+  const url = asset(src);
+  const d = dims(src);
+  const v800 = src.replace(/\.webp$/, '-800w.webp');
+  const srcset = sizes && d && existsSync(join(SRC, v800)) ? ` srcset="${asset(v800)} 800w, ${url} ${d[0]}w" sizes="${sizes}"` : '';
+  const wh = d ? ` width="${d[0]}" height="${d[1]}"` : '';
+  const load = priority ? ' fetchpriority="high"' : lazy ? ' loading="lazy"' : '';
+  return `<img src="${url}"${srcset}${wh} alt="${esc(alt)}"${load} decoding="async"${extra}>`;
+}
 
 /* Iconos ---------------------------------------------------------------- */
 const ico = {
@@ -28,7 +74,7 @@ const ico = {
 /* Plantilla común ------------------------------------------------------- */
 function layout({ title, description, path, image, body, bodyClass = '' }) {
   const url = SITE + path;
-  const og = SITE + (image || '/assets/img/og.jpg');
+  const og = SITE + asset(image || '/assets/img/og.jpg');
   return `<!doctype html>
 <html lang="es">
 <head>
@@ -46,10 +92,8 @@ function layout({ title, description, path, image, body, bodyClass = '' }) {
 <meta property="og:image" content="${og}">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap">
-<link rel="stylesheet" href="/css/estilos.css?v=${VERSION}">
+${PRELOAD_FONTS}
+<link rel="stylesheet" href="${CSS_URL}">
 </head>
 <body class="${bodyClass}">
 <a class="skip" href="#contenido">Saltar al contenido</a>
@@ -59,7 +103,7 @@ ${header(path)}
 ${body}
 </main>
 ${footer()}
-<script src="/js/main.js?v=${VERSION}" defer></script>
+<script src="${JS_URL}" defer></script>
 </body>
 </html>`;
 }
@@ -97,7 +141,7 @@ function footer() {
 }
 
 /* Piezas ---------------------------------------------------------------- */
-const coverOf = p => p.portada ? asset(p.portada) : null;
+const coverOf = p => p.portada || null;
 
 function typeCover(p) {
   const m = p.metricas?.[0];
@@ -107,7 +151,7 @@ function typeCover(p) {
 function card(p, size, i) {
   const c = coverOf(p);
   return `<a class="card card--${size} reveal" style="--d:${(i % 3) * 0.08}s" href="/proyectos/${p.slug}/">
-    <div class="card-media">${c ? `<img src="${c}" alt="" loading="lazy" decoding="async">` : typeCover(p)}</div>
+    <div class="card-media">${c ? img(c, { sizes: SIZES.card }) : typeCover(p)}</div>
     <span class="card-arrow">${ico.arrow}</span>
     <div class="card-body">
       <div class="card-top"><span>${esc(p.disciplinas.slice(0, 2).join(' · '))}</span><span>${esc(p.anio)}</span></div>
@@ -194,7 +238,7 @@ function home() {
     </div>
     <p class="sr" id="index-live" aria-live="polite"></p>
     <ul class="index">
-      ${proyectos.map((p, i) => `<li data-tags="${esc(p.disciplinas.join('|'))}"><a href="/proyectos/${p.slug}/" data-img="${coverOf(p) || ''}">
+      ${proyectos.map((p, i) => `<li data-tags="${esc(p.disciplinas.join('|'))}"><a href="/proyectos/${p.slug}/" data-img="${coverOf(p) ? asset(existsSync(join(SRC, coverOf(p).replace(/\.webp$/, '-800w.webp'))) ? coverOf(p).replace(/\.webp$/, '-800w.webp') : coverOf(p)) : ''}">
         <span class="n">${pad(i + 1)}</span><span class="t">${esc(p.titulo)}</span><span class="d">${esc(p.disciplinas.join(' · '))}</span><span class="y">${esc(p.anio)}</span>${ico.arrow}
       </a></li>`).join('')}
     </ul>
@@ -211,7 +255,7 @@ function home() {
     </div>
     <div class="lab reveal">
       <div class="lab-hint"><b>arrástrame</b><span>Ilustraciones de StickerCom</span></div>
-      ${stickers.map(s => `<div class="sticker"><img src="${asset(s)}" alt="" loading="lazy" draggable="false"></div>`).join('')}
+      ${stickers.map(s => `<div class="sticker">${img(s, { extra: ' draggable="false"' })}</div>`).join('')}
     </div>
   </div>
 </section>
@@ -281,40 +325,43 @@ function home() {
 
 /* Galería de un proyecto ------------------------------------------------ */
 function phone(item) {
-  if (item.scroll) return `<div class="phone"><div class="phone-screen scrollshot" tabindex="0"><img src="${asset(item.scroll)}" alt="${esc(item.alt)}" loading="lazy"><span class="scroll-hint">pasa el cursor ↓</span></div></div>`;
-  return `<div class="phone"><div class="phone-screen"><img src="${asset(item.src)}" alt="${esc(item.alt)}" loading="lazy"></div></div>`;
+  if (item.scroll) return `<div class="phone"><div class="phone-screen scrollshot" tabindex="0">${img(item.scroll, { alt: item.alt })}<span class="scroll-hint">pasa el cursor ↓</span></div></div>`;
+  return `<div class="phone"><div class="phone-screen">${img(item.src, { alt: item.alt })}</div></div>`;
 }
 
 function video(item) {
   return `<div><div class="phone"><div class="phone-screen" data-video><video src="${asset(item.src)}" poster="${asset(item.poster)}" preload="none" playsinline aria-label="${esc(item.alt)}"></video><button class="video-play" aria-label="Reproducir: ${esc(item.alt)}"><span>${ico.play}</span></button></div></div>${item.cap ? `<p class="phone-cap">${esc(item.cap)}</p>` : ''}</div>`;
 }
 
+const zoomBtn = (src, alt, cls, sizes, fit = true, hint = '') =>
+  `<button class="${cls} zoomable" data-zoom="${asset(src)}" data-alt="${esc(alt)}"${fit ? ' data-fit' : ''} aria-label="${fit ? 'Ampliar' : 'Recorrer'}: ${esc(alt)}">${img(src, { alt, sizes })}${hint}</button>`;
+
 function gallery(p) {
   return p.galeria.map(g => {
     const cap = g.cap ? `<figcaption>${esc(g.cap)}</figcaption>` : '';
     switch (g.tipo) {
       case 'img':
-        return `<figure class="figure reveal"><button class="frame frame--browser zoomable" data-zoom="${asset(g.src)}" data-alt="${esc(g.alt)}" data-fit aria-label="Ampliar: ${esc(g.alt)}"><img src="${g.src}" alt="${esc(g.alt)}" loading="lazy"></button>${cap}</figure>`;
+        return `<figure class="figure reveal">${zoomBtn(g.src, g.alt, 'frame frame--browser', SIZES.wide)}${cap}</figure>`;
       case 'zoom':
-        return `<figure class="figure reveal"><button class="frame zoomable" data-zoom="${asset(g.src)}" data-alt="${esc(g.alt)}" aria-label="Recorrer: ${esc(g.alt)}"><img src="${g.src}" alt="${esc(g.alt)}" loading="lazy"><span class="scroll-hint">clic para ampliar</span></button>${cap}</figure>`;
+        return `<figure class="figure reveal">${zoomBtn(g.src, g.alt, 'frame', SIZES.wide, false, '<span class="scroll-hint">clic para ampliar</span>')}${cap}</figure>`;
       case 'scroll':
-        return `<figure class="figure reveal"><div class="frame frame--browser scrollshot" tabindex="0"><img src="${asset(g.src)}" alt="${esc(g.alt)}" loading="lazy"><span class="scroll-hint">pasa el cursor para recorrer ↓</span></div>${cap}</figure>`;
+        return `<figure class="figure reveal"><div class="frame frame--browser scrollshot" tabindex="0">${img(g.src, { alt: g.alt })}<span class="scroll-hint">pasa el cursor para recorrer ↓</span></div>${cap}</figure>`;
       case 'video':
         return `<figure class="figure reveal"><div class="phones">${video({ ...g, cap: null })}</div>${cap}</figure>`;
       case 'videos':
         return `<figure class="figure reveal"><div class="phones">${g.items.map(video).join('')}</div>${cap}</figure>`;
       case 'grid':
         if (g.movil) return `<figure class="figure reveal"><div class="phones">${g.items.map(phone).join('')}</div>${cap}</figure>`;
-        return `<figure class="figure reveal"><div class="grid-figs">${g.items.map(it => `<button class="frame zoomable" data-zoom="${asset(it.src)}" data-alt="${esc(it.alt)}" data-fit aria-label="Ampliar: ${esc(it.alt)}"><img src="${it.src}" alt="${esc(it.alt)}" loading="lazy"></button>`).join('')}</div>${cap}</figure>`;
+        return `<figure class="figure reveal"><div class="grid-figs">${g.items.map(it => zoomBtn(it.src, it.alt, 'frame', SIZES.half)).join('')}</div>${cap}</figure>`;
       case 'copy':
         return `<div class="copy-wall">${g.piezas.map((c, i) => `<div class="copy-piece reveal" style="--d:${(i % 3) * .07}s"><span>${esc(c.k)}</span><p>“${esc(c.t)}”</p></div>`).join('')}</div>`;
       case 'insights':
         return `<div class="insights">${p.metricas.map(m => `<div class="insight"><b style="font:600 var(--step-3)/1 var(--font-display);color:#fff">${esc(m.v)}</b><cite>${esc(m.l)}</cite><div class="bar"><i style="--w:${parseInt(m.v)}%"></i></div></div>`).join('')}${g.citas.map(c => `<div class="insight"><blockquote>“${esc(c.q)}”</blockquote><cite>${esc(c.c)}</cite></div>`).join('')}</div>`;
       case 'stickers':
-        return `<figure class="figure reveal"><div class="sticker-grid">${stickersList(72).map(s => `<img src="${s}" alt="" loading="lazy">`).join('')}</div><figcaption>Una muestra de las colecciones: Disney, F1, Friends, Harry Potter, TBBT, Travel, Boho y personalizadas.</figcaption></figure>`;
+        return `<figure class="figure reveal"><div class="sticker-grid">${stickersList(72).map(s => img(s)).join('')}</div><figcaption>Una muestra de las colecciones: Disney, F1, Friends, Harry Potter, TBBT, Travel, Boho y personalizadas.</figcaption></figure>`;
       case 'fotos': {
         const files = readdirSync(join(SRC, 'assets/img/foto')).filter(f => f.endsWith('-sm.webp'));
-        return `<div class="photos">${files.map((f, i) => `<button class="reveal" style="--d:${(i % 3) * .06}s" data-zoom="/assets/img/foto/${f.replace('-sm', '')}" data-fit data-alt="Fotografía ${i + 1}" aria-label="Ampliar fotografía ${i + 1}"><img src="/assets/img/foto/${f}" alt="Fotografía ${i + 1} de la serie" loading="lazy"></button>`).join('')}</div>`;
+        return `<div class="photos">${files.map((f, i) => `<button class="reveal" style="--d:${(i % 3) * .06}s" data-zoom="${asset('/assets/img/foto/' + f.replace('-sm', ''))}" data-fit data-alt="Fotografía ${i + 1}" aria-label="Ampliar fotografía ${i + 1}">${img('/assets/img/foto/' + f, { alt: `Fotografía ${i + 1} de la serie` })}</button>`).join('')}</div>`;
       }
       default:
         return '';
@@ -349,7 +396,7 @@ function projectPage(p, i) {
       <div><dt>Equipo</dt><dd>${esc(p.equipo)}</dd></div>
       <div><dt>Herramientas</dt><dd>${esc(p.herramientas.join(', '))}</dd></div>
     </dl>
-    <div class="p-cover">${c ? `<img src="${c}" alt="Portada de ${esc(p.titulo)}" fetchpriority="high">` : typeCover(p)}</div>
+    <div class="p-cover">${c ? img(c, { alt: `Portada de ${p.titulo}`, sizes: SIZES.cover, priority: true }) : typeCover(p)}</div>
   </div>
 </section>
 
@@ -375,7 +422,7 @@ function projectPage(p, i) {
 <a class="next" href="/proyectos/${next.slug}/">
   <div class="wrap">
     <div><span class="kicker">Siguiente proyecto</span><h2 style="margin-top:18px">${esc(next.titulo)}</h2><p class="muted" style="margin-top:14px;max-width:44ch">${esc(next.resumen)}</p></div>
-    <div class="next-media">${coverOf(next) ? `<img src="${coverOf(next)}" alt="" loading="lazy">` : typeCover(next)}</div>
+    <div class="next-media">${coverOf(next) ? img(coverOf(next), { sizes: SIZES.next }) : typeCover(next)}</div>
   </div>
 </a>
 <div class="lightbox" role="dialog" aria-modal="true" aria-label="Imagen ampliada"><button class="lightbox-close" aria-label="Cerrar">${ico.close}</button><img alt=""></div>`;
@@ -392,10 +439,25 @@ function projectPage(p, i) {
 /* Generación ------------------------------------------------------------ */
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
-for (const d of ['assets', 'css', 'js']) cpSync(join(SRC, d), join(OUT, d), { recursive: true });
+cpSync(join(SRC, 'assets'), join(OUT, 'assets'), { recursive: true });
 cpSync(join(SRC, 'static'), OUT, { recursive: true });
 
 const write = (rel, html) => { const f = join(OUT, rel); mkdirSync(dirname(f), { recursive: true }); writeFileSync(f, html); };
+
+// CSS (fuentes + estilos) y JS minificados con esbuild; si no está instalado, se publican tal cual.
+let esbuild = null;
+try { esbuild = await import('esbuild'); } catch { console.warn('! esbuild no está instalado (npm install): CSS y JS sin minificar'); }
+const minify = async (code, loader) => esbuild ? (await esbuild.transform(code, { loader, minify: true, target: 'es2019' })).code : code;
+const css = await minify(readFileSync(join(SRC, 'css/fuentes.css'), 'utf8') + readFileSync(join(SRC, 'css/estilos.css'), 'utf8'), 'css');
+const js = await minify(readFileSync(join(SRC, 'js/main.js'), 'utf8'), 'js');
+write('css/estilos.css', css);
+write('js/main.js', js);
+const CSS_URL = `/css/estilos.css?v=${md5(css)}`;
+const JS_URL = `/js/main.js?v=${md5(js)}`;
+// Precarga de las dos fuentes visibles en la primera pantalla (títulos y texto).
+const PRELOAD_FONTS = readdirSync(join(SRC, 'assets/fonts'))
+  .filter(f => /^(space-grotesk|inter)-/.test(f))
+  .map(f => `<link rel="preload" href="/assets/fonts/${f}" as="font" type="font/woff2" crossorigin>`).join('\n');
 write('index.html', home());
 proyectos.forEach((p, i) => {
   p.relacionados?.forEach(r => { if (!bySlug[r]) console.warn(`! ${p.slug}: relacionado inexistente "${r}"`); });
@@ -412,4 +474,6 @@ write('robots.txt', `User-agent: *\nAllow: /\n\nSitemap: ${SITE}/sitemap.xml\n`)
 write('llms.txt', `# ${perfil.nombre} · ${perfil.marca}\n\n> ${perfil.rol}. ${perfil.ciudad}.\n\n## Proyectos\n${proyectos.map(p => `- [${p.titulo}](${SITE}/proyectos/${p.slug}/): ${p.resumen}`).join('\n')}\n\n## Contacto\n- ${perfil.email}\n`);
 
 if (missing.size) { console.error('Faltan archivos:\n' + [...missing].join('\n')); process.exit(1); }
-console.log(`Sitio generado en dist/ · ${urls.length} páginas · ${SITE}`);
+const sinVariante = [...hashes.keys()].filter(s => /\/img\/(?!stickers\/).*(?<!-800w|-sm)\.webp$/.test(s) && (dims(s)?.[0] ?? 0) > 1000 && dims(s)[1] <= dims(s)[0] * 2.2 && !existsSync(join(SRC, s.replace(/\.webp$/, '-800w.webp'))));
+if (sinVariante.length) console.warn(`! ${sinVariante.length} imágenes grandes sin versión de 800 px: ejecuta "python scripts/variantes.py"`);
+console.log(`Sitio generado en dist/ · ${urls.length} páginas · CSS ${(css.length / 1024).toFixed(1)} KB · JS ${(js.length / 1024).toFixed(1)} KB${esbuild ? ' (minificados)' : ''} · ${SITE}`);

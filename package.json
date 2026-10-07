@@ -6,5 +6,10 @@
     "build": "node scripts/build.mjs",
     "dev": "node scripts/build.mjs && npx -y http-server dist -p 5190 -c-1"
   },
-  "engines": { "node": ">=18" }
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  }
 }
