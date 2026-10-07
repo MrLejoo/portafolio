@@ -55,13 +55,14 @@ Varios textos se **redactaron a partir del material** porque no había descripci
 
 ## 5. Publicación (GitHub + Cloudflare Pages)
 
-Pendiente de conectar (ver sección 6 cuando se haga). Configuración prevista en Cloudflare Pages:
+- **GitHub:** https://github.com/MrLejoo/portafolio (público, rama `main`). El remoto es `https://MrLejoo@github.com/MrLejoo/portafolio.git`: el usuario va en la URL para que Windows guarde esta credencial aparte de la de StickerCom (`contactstickercom-code`).
+- **Cloudflare Pages:** pendiente de conectar. Configuración prevista:
 - Framework preset: **None** · Build command: `npm run build` · Build output directory: `dist` · Variable `SITE_URL` con la URL final.
 - Cada `git push` a `main` publica automáticamente.
 
 ## 6. Pendientes
 
-1. Crear la cuenta/repositorio de GitHub y el proyecto de Cloudflare Pages, y conectarlos.
+1. Crear el proyecto de Cloudflare Pages y conectarlo al repositorio de GitHub (GitHub ya está listo desde el 07/10/2026).
 2. Ajustar `SITE_URL` (y dominio propio si se compra).
 3. Que el usuario revise los textos de la sección 4.
 4. Opcional: enlaces públicos de WaDirecto, Texto Chimbo y ROI Express cuando estén publicados (campo `enlace` en cada proyecto).
