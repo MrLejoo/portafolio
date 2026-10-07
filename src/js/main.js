@@ -126,6 +126,8 @@
         else collect(n, n.className);
       });
       collect(tmp, null);
+      // Reserva el alto final antes de vaciarla: así escribir no empuja el contenido de abajo (CLS).
+      term.style.minHeight = `${term.offsetHeight}px`;
       term.innerHTML = '';
       let i = 0, cur = null, curCls;
       const caret = document.createElement('span');
