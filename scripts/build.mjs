@@ -127,7 +127,6 @@ function stickersList(limit) {
 /* Portada --------------------------------------------------------------- */
 function home() {
   const destacados = proyectos.filter(p => p.destacado);
-  const sizes = ['xl', 'l', 'l', 'xl', 'm', 'm', 'm'];
   const counts = Object.fromEntries(disciplinas.map(d => [d, proyectos.filter(p => p.disciplinas.includes(d)).length]));
   const marquee = ['Investigación UX', 'Diseño de interfaces', 'Prototipado en Figma', 'Desarrollo web', 'Supabase', 'Cloudflare', 'Copywriting', 'Ilustración', 'Motion', 'SEO técnico', 'Fotografía', 'Estrategia de marketing'];
   const stickers = stickersList(22);
@@ -180,7 +179,7 @@ function home() {
       <h2 data-split>Proyectos que cuentan cómo pienso</h2>
       <p class="reveal">Cada caso explica la intención, el reto y el camino completo, paso a paso, desde la primera pregunta hasta el resultado.</p>
     </div>
-    <div class="bento">${destacados.map((p, i) => card(p, sizes[i] || 'm', i)).join('')}</div>
+    <div class="bento">${destacados.map((p, i) => card(p, destacados.length % 2 && i === destacados.length - 1 ? 'full' : i % 4 === 0 || i % 4 === 3 ? 'xl' : 'l', i)).join('')}</div>
   </div>
 </section>
 
@@ -301,7 +300,7 @@ function gallery(p) {
       case 'scroll':
         return `<figure class="figure reveal"><div class="frame frame--browser scrollshot" tabindex="0"><img src="${asset(g.src)}" alt="${esc(g.alt)}" loading="lazy"><span class="scroll-hint">pasa el cursor para recorrer ↓</span></div>${cap}</figure>`;
       case 'video':
-        return `<figure class="figure reveal"><div class="phones">${video(g)}</div>${cap}</figure>`;
+        return `<figure class="figure reveal"><div class="phones">${video({ ...g, cap: null })}</div>${cap}</figure>`;
       case 'videos':
         return `<figure class="figure reveal"><div class="phones">${g.items.map(video).join('')}</div>${cap}</figure>`;
       case 'grid':

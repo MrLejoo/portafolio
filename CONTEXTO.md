@@ -42,6 +42,7 @@ Cuando el usuario diga que **subió archivos nuevos**:
 
 Historial de sincronizaciones:
 - 07/10/2026: descarga inicial (356 archivos) y, en la misma sesión, nuevo `Videos animados/making-of.mp4` → proyecto «StickerCom · Reel y making of».
+- 07/10/2026: nuevo `Videos animados/reaccionar-vs-responder.mp4` → proyecto «Reaccionar vs Responder» (Motion, animación 3D). Fotogramas en `src/assets/img/reaccionar/`, portada en `_fuente/portadas.py`. Herramientas e intención redactadas por Claude: confirmar con el usuario.
 
 Herramientas usadas por los scripts: Python 3 con Pillow, PyMuPDF, numpy y scipy; Edge sin ventana para capturas (`_fuente/capturar.py`).
 

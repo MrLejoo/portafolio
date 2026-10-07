@@ -240,12 +240,16 @@ p { margin: 0; text-wrap: pretty; }
 .card--xl { grid-column: span 7; }
 .card--l { grid-column: span 5; }
 .card--m { grid-column: span 4; }
+.card--full { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
+.card--full .card-media { aspect-ratio: 16 / 10; }
+.card--full .card-body { align-content: center; padding: 32px 36px; }
+.card--full h3 { font-size: var(--step-3); }
 .card--xl .card-media { aspect-ratio: 16 / 11; }
 .card--tall .card-media { aspect-ratio: 4 / 5; }
 .cover-type { position: absolute; inset: 0; display: grid; align-content: space-between; padding: 26px; background: radial-gradient(circle at 80% 10%, rgba(119, 141, 169, .35), transparent 50%), linear-gradient(160deg, var(--surface-2), var(--bg-deep)); }
 .cover-type b { font: 600 clamp(2.6rem, 6vw, 4.6rem)/.9 var(--font-display); color: var(--white); letter-spacing: -.04em; }
 .cover-type small { font: 500 12px/1.6 var(--font-mono); color: var(--mist-light); text-transform: uppercase; letter-spacing: .1em; }
-@media (max-width: 960px) { .card--xl, .card--l, .card--m { grid-column: span 6; } }
+@media (max-width: 960px) { .card--xl, .card--l, .card--m { grid-column: span 6; } .card--full { grid-template-columns: 1fr; } }
 @media (max-width: 640px) { .bento { gap: 14px; } .card--xl, .card--l, .card--m { grid-column: 1 / -1; } }
 
 /* Índice de proyectos ------------------------------------------------------- */
@@ -354,7 +358,7 @@ p { margin: 0; text-wrap: pretty; }
 .meta div { background: var(--bg); padding: 18px 20px; }
 .meta dt { font: 500 11px/1 var(--font-mono); color: var(--mist); text-transform: uppercase; letter-spacing: .12em; margin-bottom: 10px; }
 .meta dd { margin: 0; color: var(--white); font-size: 15px; line-height: 1.45; }
-.p-cover { margin-top: clamp(40px, 6vw, 72px); border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--line); background: var(--surface); aspect-ratio: 16 / 9; position: relative; }
+.p-cover { margin-top: clamp(40px, 6vw, 72px); border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--line); background: var(--surface); aspect-ratio: 16 / 10; position: relative; }
 .p-cover img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
 .p-cover.is-in img { animation: cover-in 1.4s var(--ease-out) both; }
 @keyframes cover-in { from { scale: 1.12; clip-path: inset(18% 8% 18% 8% round 22px); } to { scale: 1; clip-path: inset(0 round 0); } }
