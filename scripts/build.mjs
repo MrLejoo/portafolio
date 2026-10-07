@@ -45,22 +45,12 @@ function dims(src) {
   return d;
 }
 
-// <img> con huella, tamaño declarado (evita saltos al cargar) y srcset si existe la versión de 800 px.
-const SIZES = {
-  card: '(max-width: 640px) 92vw, (max-width: 960px) 46vw, 700px',
-  cover: '(max-width: 1240px) 92vw, 1160px',
-  wide: '(max-width: 960px) 92vw, 900px',
-  half: '(max-width: 640px) 92vw, 450px',
-  next: '(max-width: 760px) 92vw, 500px',
-};
-function img(src, { alt = '', sizes, lazy = true, priority = false, extra = '' } = {}) {
-  const url = asset(src);
+// <img> con huella y tamaño declarado (evita saltos al cargar). Siempre la imagen original, a calidad completa.
+function img(src, { alt = '', lazy = true, priority = false, extra = '' } = {}) {
   const d = dims(src);
-  const v800 = src.replace(/\.webp$/, '-800w.webp');
-  const srcset = sizes && d && existsSync(join(SRC, v800)) ? ` srcset="${asset(v800)} 800w, ${url} ${d[0]}w" sizes="${sizes}"` : '';
   const wh = d ? ` width="${d[0]}" height="${d[1]}"` : '';
   const load = priority ? ' fetchpriority="high"' : lazy ? ' loading="lazy"' : '';
-  return `<img src="${url}"${srcset}${wh} alt="${esc(alt)}"${load} decoding="async"${extra}>`;
+  return `<img src="${asset(src)}"${wh} alt="${esc(alt)}"${load} decoding="async"${extra}>`;
 }
 
 /* Iconos ---------------------------------------------------------------- */
@@ -151,7 +141,7 @@ function typeCover(p) {
 function card(p, size, i) {
   const c = coverOf(p);
   return `<a class="card card--${size} reveal" style="--d:${(i % 3) * 0.08}s" href="/proyectos/${p.slug}/">
-    <div class="card-media">${c ? img(c, { sizes: SIZES.card }) : typeCover(p)}</div>
+    <div class="card-media">${c ? img(c, {}) : typeCover(p)}</div>
     <span class="card-arrow">${ico.arrow}</span>
     <div class="card-body">
       <div class="card-top"><span>${esc(p.disciplinas.slice(0, 2).join(' · '))}</span><span>${esc(p.anio)}</span></div>
@@ -238,7 +228,7 @@ function home() {
     </div>
     <p class="sr" id="index-live" aria-live="polite"></p>
     <ul class="index">
-      ${proyectos.map((p, i) => `<li data-tags="${esc(p.disciplinas.join('|'))}"><a href="/proyectos/${p.slug}/" data-img="${coverOf(p) ? asset(existsSync(join(SRC, coverOf(p).replace(/\.webp$/, '-800w.webp'))) ? coverOf(p).replace(/\.webp$/, '-800w.webp') : coverOf(p)) : ''}">
+      ${proyectos.map((p, i) => `<li data-tags="${esc(p.disciplinas.join('|'))}"><a href="/proyectos/${p.slug}/" data-img="${coverOf(p) ? asset(coverOf(p)) : ''}">
         <span class="n">${pad(i + 1)}</span><span class="t">${esc(p.titulo)}</span><span class="d">${esc(p.disciplinas.join(' · '))}</span><span class="y">${esc(p.anio)}</span>${ico.arrow}
       </a></li>`).join('')}
     </ul>
@@ -333,17 +323,17 @@ function video(item) {
   return `<div><div class="phone"><div class="phone-screen" data-video><video src="${asset(item.src)}" poster="${asset(item.poster)}" preload="none" playsinline aria-label="${esc(item.alt)}"></video><button class="video-play" aria-label="Reproducir: ${esc(item.alt)}"><span>${ico.play}</span></button></div></div>${item.cap ? `<p class="phone-cap">${esc(item.cap)}</p>` : ''}</div>`;
 }
 
-const zoomBtn = (src, alt, cls, sizes, fit = true, hint = '') =>
-  `<button class="${cls} zoomable" data-zoom="${asset(src)}" data-alt="${esc(alt)}"${fit ? ' data-fit' : ''} aria-label="${fit ? 'Ampliar' : 'Recorrer'}: ${esc(alt)}">${img(src, { alt, sizes })}${hint}</button>`;
+const zoomBtn = (src, alt, cls, fit = true, hint = '') =>
+  `<button class="${cls} zoomable" data-zoom="${asset(src)}" data-alt="${esc(alt)}"${fit ? ' data-fit' : ''} aria-label="${fit ? 'Ampliar' : 'Recorrer'}: ${esc(alt)}">${img(src, { alt })}${hint}</button>`;
 
 function gallery(p) {
   return p.galeria.map(g => {
     const cap = g.cap ? `<figcaption>${esc(g.cap)}</figcaption>` : '';
     switch (g.tipo) {
       case 'img':
-        return `<figure class="figure reveal">${zoomBtn(g.src, g.alt, 'frame frame--browser', SIZES.wide)}${cap}</figure>`;
+        return `<figure class="figure reveal">${zoomBtn(g.src, g.alt, 'frame frame--browser')}${cap}</figure>`;
       case 'zoom':
-        return `<figure class="figure reveal">${zoomBtn(g.src, g.alt, 'frame', SIZES.wide, false, '<span class="scroll-hint">clic para ampliar</span>')}${cap}</figure>`;
+        return `<figure class="figure reveal">${zoomBtn(g.src, g.alt, 'frame', false, '<span class="scroll-hint">clic para ampliar</span>')}${cap}</figure>`;
       case 'scroll':
         return `<figure class="figure reveal"><div class="frame frame--browser scrollshot" tabindex="0">${img(g.src, { alt: g.alt })}<span class="scroll-hint">pasa el cursor para recorrer ↓</span></div>${cap}</figure>`;
       case 'video':
@@ -352,7 +342,7 @@ function gallery(p) {
         return `<figure class="figure reveal"><div class="phones">${g.items.map(video).join('')}</div>${cap}</figure>`;
       case 'grid':
         if (g.movil) return `<figure class="figure reveal"><div class="phones">${g.items.map(phone).join('')}</div>${cap}</figure>`;
-        return `<figure class="figure reveal"><div class="grid-figs">${g.items.map(it => zoomBtn(it.src, it.alt, 'frame', SIZES.half)).join('')}</div>${cap}</figure>`;
+        return `<figure class="figure reveal"><div class="grid-figs">${g.items.map(it => zoomBtn(it.src, it.alt, 'frame')).join('')}</div>${cap}</figure>`;
       case 'copy':
         return `<div class="copy-wall">${g.piezas.map((c, i) => `<div class="copy-piece reveal" style="--d:${(i % 3) * .07}s"><span>${esc(c.k)}</span><p>“${esc(c.t)}”</p></div>`).join('')}</div>`;
       case 'insights':
@@ -396,7 +386,7 @@ function projectPage(p, i) {
       <div><dt>Equipo</dt><dd>${esc(p.equipo)}</dd></div>
       <div><dt>Herramientas</dt><dd>${esc(p.herramientas.join(', '))}</dd></div>
     </dl>
-    <div class="p-cover">${c ? img(c, { alt: `Portada de ${p.titulo}`, sizes: SIZES.cover, priority: true }) : typeCover(p)}</div>
+    <div class="p-cover">${c ? img(c, { alt: `Portada de ${p.titulo}`, priority: true }) : typeCover(p)}</div>
   </div>
 </section>
 
@@ -422,7 +412,7 @@ function projectPage(p, i) {
 <a class="next" href="/proyectos/${next.slug}/">
   <div class="wrap">
     <div><span class="kicker">Siguiente proyecto</span><h2 style="margin-top:18px">${esc(next.titulo)}</h2><p class="muted" style="margin-top:14px;max-width:44ch">${esc(next.resumen)}</p></div>
-    <div class="next-media">${coverOf(next) ? img(coverOf(next), { sizes: SIZES.next }) : typeCover(next)}</div>
+    <div class="next-media">${coverOf(next) ? img(coverOf(next), {}) : typeCover(next)}</div>
   </div>
 </a>
 <div class="lightbox" role="dialog" aria-modal="true" aria-label="Imagen ampliada"><button class="lightbox-close" aria-label="Cerrar">${ico.close}</button><img alt=""></div>`;
@@ -474,6 +464,4 @@ write('robots.txt', `User-agent: *\nAllow: /\n\nSitemap: ${SITE}/sitemap.xml\n`)
 write('llms.txt', `# ${perfil.nombre} · ${perfil.marca}\n\n> ${perfil.rol}. ${perfil.ciudad}.\n\n## Proyectos\n${proyectos.map(p => `- [${p.titulo}](${SITE}/proyectos/${p.slug}/): ${p.resumen}`).join('\n')}\n\n## Contacto\n- ${perfil.email}\n`);
 
 if (missing.size) { console.error('Faltan archivos:\n' + [...missing].join('\n')); process.exit(1); }
-const sinVariante = [...hashes.keys()].filter(s => /\/img\/(?!stickers\/).*(?<!-800w|-sm)\.webp$/.test(s) && (dims(s)?.[0] ?? 0) > 1000 && dims(s)[1] <= dims(s)[0] * 2.2 && !existsSync(join(SRC, s.replace(/\.webp$/, '-800w.webp'))));
-if (sinVariante.length) console.warn(`! ${sinVariante.length} imágenes grandes sin versión de 800 px: ejecuta "python scripts/variantes.py"`);
 console.log(`Sitio generado en dist/ · ${urls.length} páginas · CSS ${(css.length / 1024).toFixed(1)} KB · JS ${(js.length / 1024).toFixed(1)} KB${esbuild ? ' (minificados)' : ''} · ${SITE}`);

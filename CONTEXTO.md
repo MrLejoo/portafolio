@@ -20,7 +20,6 @@ src/js/main.js           ← animaciones e interacciones (sin dependencias)
 src/assets/img|video     ← imágenes WebP y videos ya optimizados (sí van a git)
 src/static/              ← favicon, _headers (se copian tal cual)
 scripts/build.mjs        ← genera dist/: portada, /proyectos/<slug>/, 404, sitemap, robots, llms.txt
-scripts/variantes.py     ← versiones de 800 px (-800w.webp) para srcset; ejecutar tras añadir imágenes
 _fuente/                 ← NO va a git: copia de Drive, capturas, scripts de procesado
 ```
 
@@ -71,7 +70,7 @@ Varios textos se **redactaron a partir del material** porque no había descripci
 Lo que garantiza que aguante mucho tráfico:
 - **Caché con huellas:** `build.mjs` añade `?v=<md5 del contenido>` a cada imagen, video, CSS y JS. `_headers` los guarda en caché un año (`immutable`). Si un archivo cambia, cambia su URL; si no cambia, el visitante reutiliza su caché entre publicaciones. El HTML va con `max-age=0` para que cada publicación se vea al instante.
 - **Sin terceros:** fuentes servidas desde el sitio (sin Google Fonts) y precargadas. 0 peticiones externas.
-- **Imágenes responsive:** `-800w.webp` + `srcset/sizes`; `width/height` leídos de la cabecera WebP para evitar saltos (CLS 0). El build avisa si una imagen grande no tiene variante.
+- **Imágenes a calidad completa:** siempre se sirve la imagen original (sin versiones reducidas ni `srcset`: el usuario prefirió el detalle real; las de 800 px se veían pixeladas). `width/height` se leen de la cabecera WebP para evitar saltos (CLS 0).
 - **CSS/JS minificados** con esbuild (devDependency; Cloudflare lo instala con `npm install`).
 - **Seguridad:** `Content-Security-Policy` solo permite recursos propios (+ Cloudflare Web Analytics por si se activa). Si se añade un recurso externo (p. ej. un video de YouTube), hay que añadir su dominio a la CSP en `src/static/_headers`.
 
