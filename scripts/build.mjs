@@ -161,7 +161,7 @@ function home() {
     <span class="t-str">"webs que se publican solas"</span>,
     <span class="t-str">"textos que venden"</span>
   ],
-  <span class="t-key">"stack"</span>: [<span class="t-str">"Figma"</span>, <span class="t-str">"JS"</span>, <span class="t-str">"Supabase"</span>, <span class="t-str">"Cloudflare"</span>],
+  <span class="t-key">"stack"</span>: [<span class="t-str">"Figma"</span>, <span class="t-str">"JS"</span>, <span class="t-str">"Python"</span>, <span class="t-str">"Supabase"</span>],
   <span class="t-key">"idiomas"</span>: [<span class="t-str">"español"</span>, <span class="t-str">"inglés"</span>],
   <span class="t-key">"disponible"</span>: <span class="t-str">true</span>
 }
@@ -250,7 +250,7 @@ function home() {
     <div class="skills">
       ${[
         ['UX/UI', 'Figma · Maze · Hotjar', 'Investigación, arquitectura de información, prototipos de alta fidelidad y sistemas de diseño.'],
-        ['Desarrollo web', 'JS · Supabase · Cloudflare', 'Sitios rápidos y accesibles, tiendas con pagos, paneles de administración y SEO técnico.'],
+        ['Desarrollo', 'JS · Python · Supabase', 'Webs rápidas y accesibles, tiendas con pagos, paneles de administración, SEO técnico y apps de escritorio para Windows.'],
         ['Copywriting', 'ES · EN', 'Landings, anuncios de respuesta directa, correos en frío, guiones y microcopy de producto.'],
         ['Diseño gráfico', 'Illustrator · Photoshop', 'Ilustración, piezas para redes, gran formato y archivos listos para imprenta.'],
         ['Motion y foto', 'Video · Cámara', 'Reels de producto, making of y fotografía que entrena el ojo para componer.'],
