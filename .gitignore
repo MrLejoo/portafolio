@@ -1,0 +1,5 @@
+_fuente/
+dist/
+node_modules/
+.claude/
+*.log
