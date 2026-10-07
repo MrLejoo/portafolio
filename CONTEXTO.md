@@ -15,10 +15,12 @@ Portafolio de **Alejandro Hurtado** («El Alquimista Digital»): diseño UX/UI, 
 ```
 src/data/proyectos.mjs   ← TODO el contenido (perfil + proyectos). Editar aquí.
 src/css/estilos.css      ← sistema visual (tokens en :root)
+src/css/fuentes.css      ← @font-face de las fuentes propias (src/assets/fonts)
 src/js/main.js           ← animaciones e interacciones (sin dependencias)
 src/assets/img|video     ← imágenes WebP y videos ya optimizados (sí van a git)
 src/static/              ← favicon, _headers (se copian tal cual)
 scripts/build.mjs        ← genera dist/: portada, /proyectos/<slug>/, 404, sitemap, robots, llms.txt
+scripts/variantes.py     ← versiones de 800 px (-800w.webp) para srcset; ejecutar tras añadir imágenes
 _fuente/                 ← NO va a git: copia de Drive, capturas, scripts de procesado
 ```
 
@@ -58,13 +60,39 @@ Varios textos se **redactaron a partir del material** porque no había descripci
 ## 5. Publicación (GitHub + Cloudflare Pages)
 
 - **GitHub:** https://github.com/MrLejoo/portafolio (público, rama `main`). El remoto es `https://MrLejoo@github.com/MrLejoo/portafolio.git`: el usuario va en la URL para que Windows guarde esta credencial aparte de la de StickerCom (`contactstickercom-code`).
-- **Cloudflare Pages:** pendiente de conectar. Configuración prevista:
-- Framework preset: **None** · Build command: `npm run build` · Build output directory: `dist` · Variable `SITE_URL` con la URL final.
-- Cada `git push` a `main` publica automáticamente.
+- **Cloudflare Pages:** proyecto `alejandrohurtadomartin` → https://alejandrohurtadomartin.pages.dev. Framework preset **None** · Build command `npm run build` · Output `dist` · variables `SITE_URL` y `NODE_VERSION=20`.
+- Cada `git push` a `main` publica en producción en 1-2 minutos.
+- **Ramas de prueba:** cualquier otra rama publica una vista previa en `https://<rama>.alejandrohurtadomartin.pages.dev` (con `noindex`). Úsala para cambios grandes: probar ahí y luego `git merge --ff-only` a `main`. Ejemplo: la rama `rendimiento`.
+
+## 5b. Rendimiento y escala (07/10/2026)
+
+**No hay base de datos ni servidor propio**: es un sitio estático servido desde la red de Cloudflare. No hay consultas que optimizar ni tablas que indexar; si algún día se añade algo dinámico (formulario de contacto, comentarios, contador de visitas), ver «Si se añade algo dinámico» abajo.
+
+Lo que garantiza que aguante mucho tráfico:
+- **Caché con huellas:** `build.mjs` añade `?v=<md5 del contenido>` a cada imagen, video, CSS y JS. `_headers` los guarda en caché un año (`immutable`). Si un archivo cambia, cambia su URL; si no cambia, el visitante reutiliza su caché entre publicaciones. El HTML va con `max-age=0` para que cada publicación se vea al instante.
+- **Sin terceros:** fuentes servidas desde el sitio (sin Google Fonts) y precargadas. 0 peticiones externas.
+- **Imágenes responsive:** `-800w.webp` + `srcset/sizes`; `width/height` leídos de la cabecera WebP para evitar saltos (CLS 0). El build avisa si una imagen grande no tiene variante.
+- **CSS/JS minificados** con esbuild (devDependency; Cloudflare lo instala con `npm install`).
+- **Seguridad:** `Content-Security-Policy` solo permite recursos propios (+ Cloudflare Web Analytics por si se activa). Si se añade un recurso externo (p. ej. un video de YouTube), hay que añadir su dominio a la CSP en `src/static/_headers`.
+
+Mediciones (visitante nuevo sin caché, recorriendo la página completa):
+
+| Página | Antes | Después |
+|---|---|---|
+| Portada en móvil | 0,96 MB · LCP 1,4 s · CLS 0,23 · 4 peticiones externas | 0,61 MB · LCP 0,8 s · CLS 0 · 0 externas |
+| DiskPulse en móvil | 0,64 MB · LCP 1,0 s | 0,29 MB · LCP 0,6 s |
+
+Prueba de carga (autocannon, 20 s): ~25.000 peticiones, **0 respuestas de error del servidor** y la misma latencia mediana (~135 ms) con 20 o con 100 conexiones simultáneas. Los únicos fallos con 100 conexiones fueron de conexión en el equipo de prueba (desaparecen con 20), no de Cloudflare. Scripts: `_fuente/medir.mjs` (peso, LCP, CLS) y `_fuente/cls.mjs`.
+
+Límites a tener en cuenta (plan gratuito de Cloudflare Pages): ancho de banda y peticiones a archivos estáticos sin límite; 500 publicaciones al mes; máximo 20.000 archivos por publicación y 25 MB por archivo (los videos van a 720p por eso).
+
+**Si se añade algo dinámico:** usar una Cloudflare Pages Function o Supabase; índices en las columnas por las que se filtra u ordena; RLS en Supabase; límite de envíos por IP y captcha (Turnstile) en formularios; y nunca hacer que la portada dependa de una consulta (mejor generar los datos en el build).
+
+**Para replicar el portafolio** (otra persona u otra marca): copiar el repositorio, cambiar `src/data/proyectos.mjs` (perfil y proyectos), las imágenes de `src/assets` y la paleta de `:root` en `estilos.css`; crear un proyecto de Cloudflare Pages con la misma configuración y `SITE_URL` propia.
 
 ## 6. Pendientes
 
-1. Crear el proyecto de Cloudflare Pages y conectarlo al repositorio de GitHub (GitHub ya está listo desde el 07/10/2026).
-2. Ajustar `SITE_URL` (y dominio propio si se compra).
+1. Dominio propio (opcional): añadirlo en Cloudflare Pages → Custom domains y actualizar `SITE_URL`.
+2. Activar Cloudflare Web Analytics (opcional; la CSP ya lo permite).
 3. Que el usuario revise los textos de la sección 4.
 4. Opcional: enlaces públicos de WaDirecto, Texto Chimbo y ROI Express cuando estén publicados (campo `enlace` en cada proyecto).
