@@ -46,6 +46,8 @@ Historial de sincronizaciones:
 - 07/10/2026: nuevo `Videos animados/reaccionar-vs-responder.mp4` → proyecto «Reaccionar vs Responder» (Motion, animación 3D). Fotogramas en `src/assets/img/reaccionar/`, portada en `_fuente/portadas.py`. Herramientas e intención redactadas por Claude: confirmar con el usuario.
 - 07/10/2026: **DiskPulse** (app de escritorio, código en `E:\Claude\diskpulse`, instalada en `%LOCALAPPDATA%\Programs\DiskPulse`). Capturas con `_fuente/capturar_diskpulse.mjs` (playwright-core + Edge, servidor `python app.py --no-open`), escaneando `_fuente\drive` para no mostrar archivos personales. Entra en destacados y AirBijagos sale de ellos a petición del usuario.
 
+- 08/10/2026 (ordenador nuevo, proyecto en `C:\Users\mrlej\OneDrive\Documents\Portafolio`): **Mixing Kit** (laboratorio de mixología 3D con Three.js + Vite, código en `C:\Users\mrlej\OneDrive\Documents\mixing-kit`, publicado aparte en Cloudflare Pages, proyecto `mixingkit` → https://mixingkit.pages.dev, con `npm run deploy` desde su carpeta). Capturas de la web publicada con `_fuente/capturar_mixingkit.mjs` (Edge con GPU para WebGL), WebP con `_fuente/procesar_mixingkit.py` (escritorio 1600 px, móvil a 780 px completos) y portada en `_fuente/portadas.py`. Destacado, con botón «Abrir Mixing Kit en vivo». Relacionado con Velvet & Spirit. Textos redactados por Claude a partir del código: confirmar con el usuario.
+
 Herramientas usadas por los scripts: Python 3 con Pillow, PyMuPDF, numpy y scipy; Edge sin ventana para capturas (`_fuente/capturar.py`).
 
 ## 4. Textos que conviene que el usuario revise

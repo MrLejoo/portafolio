@@ -193,7 +193,8 @@ Lo que Claude encontrará en `CONTEXTO.md`:
 ## 7. Estado del proyecto al migrar (08/10/2026)
 
 - **19 páginas publicadas**: la portada y 18 casos de estudio (más la página de error 404, el sitemap y los archivos para buscadores).
-- **Proyectos destacados:** StickerCom, DiskPulse, Wander, Velvet & Spirit, StickerCom · Ilustración, StickerCom · Reel y making of, Reaccionar vs Responder.
+- **Actualización tras migrar (08/10/2026):** 20 páginas, con el nuevo caso **Mixing Kit** (destacado). El proyecto vive ahora en `C:\Users\mrlej\OneDrive\Documents\Portafolio`.
+- **Proyectos destacados:** StickerCom, DiskPulse, Mixing Kit, Wander, Velvet & Spirit, StickerCom · Ilustración, StickerCom · Reel y making of, Reaccionar vs Responder.
 - **Resto del índice:** AirBijagos, LoremCraft → Texto Chimbo, BoKditos, WaDirecto, ROI Express, Beacon 212, campañas en inglés, MaiGourmet, Exploraciones tipográficas, Checkout y registro, Fotografía.
 - **Último cambio:** imágenes de nuevo a calidad completa (sin versiones reducidas). Se mantienen la caché con huellas, las fuentes propias, el tamaño declarado de las imágenes y la política de seguridad.
 - **Pendientes:**
