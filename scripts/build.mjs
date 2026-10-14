@@ -170,7 +170,7 @@ function home() {
   <div class="wrap">
     <div>
       <span class="kicker reveal">Portafolio · ${esc(perfil.ciudad)}</span>
-      <h1 data-split>Diseño, escribo y construyo productos <span class="soft">que la gente entiende</span><span class="cursor"></span></h1>
+      <h1 data-split>Diseño, escribo y construyo productos <span class="soft"><em>que la gente entiende</em></span><span class="cursor"></span></h1>
       <p class="hero-lead reveal" style="--d:.35s">Soy <strong>${esc(perfil.nombre)}</strong>: diseñador UX/UI, desarrollador web y copywriter. Del primer minuto de investigación al código en producción, con una idea fija: que cada pantalla tenga una razón de existir.</p>
       <div class="hero-cta reveal" style="--d:.5s">
         <a class="btn" href="#proyectos">Ver proyectos ${ico.arrow}</a>
@@ -183,7 +183,18 @@ function home() {
         <div><b>1</b><span>tienda en producción</span></div>
       </div>
     </div>
-    <div class="terminal reveal" style="--d:.25s" aria-label="Perfil en formato de código">
+    <div class="hero-art reveal" style="--d:.25s">
+    <div class="artifact art-stat" aria-hidden="true">
+      <small>Proyectos publicados</small>
+      <b>${proyectos.length}</b>
+      <i>en ${disciplinas.length} disciplinas · desde 2023</i>
+      <svg viewBox="0 0 180 34" fill="none"><path d="M2 30 C 24 28, 30 22, 46 23 S 70 12, 88 15 S 112 20, 126 10 S 158 6, 178 3" stroke="#5D2A1A" stroke-width="1.8" stroke-linecap="round"/><circle cx="178" cy="3" r="2.6" fill="#5D2A1A"/></svg>
+    </div>
+    <div class="artifact art-cursor" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 2.5 20 11l-7 1.6L9.6 20z"/></svg>
+      <span class="av">AH</span><span>Alejandro está diseñando</span>
+    </div>
+    <div class="terminal" aria-label="Perfil en formato de código">
       <div class="terminal-bar"><i></i><i></i><i></i><span>~/alquimista — perfil.json</span></div>
 <pre data-type><span class="t-prompt">$</span> cat perfil.json
 {
@@ -201,6 +212,8 @@ function home() {
 }
 <span class="t-com">// convierto ideas sueltas en productos que funcionan</span></pre>
     </div>
+    <a class="art-ask" href="#contacto"><em>Cuéntame qué quieres construir…</em><b aria-hidden="true">${ico.arrow}</b><span class="sr">Ir a contacto</span></a>
+    </div>
   </div>
 </section>
 
@@ -210,7 +223,7 @@ function home() {
   <div class="wrap">
     <div class="section-head">
       <span class="kicker">01 — Trabajo seleccionado</span>
-      <h2 data-split>Proyectos que cuentan cómo pienso</h2>
+      <h2 data-split>Proyectos que cuentan <em>cómo pienso</em></h2>
       <p class="reveal">Cada caso explica la intención, el reto y el camino completo, paso a paso, desde la primera pregunta hasta el resultado.</p>
     </div>
     <div class="bento">${destacados.map((p, i) => card(p, destacados.length % 2 && i === destacados.length - 1 ? 'full' : i % 4 === 0 || i % 4 === 3 ? 'xl' : 'l', i)).join('')}</div>
@@ -220,7 +233,7 @@ function home() {
 <section class="section" id="indice" style="padding-top:0">
   <div class="wrap">
     <div class="section-head section-head--row">
-      <div style="display:grid;gap:18px"><span class="kicker">02 — Índice completo</span><h2 data-split>Todo el archivo</h2></div>
+      <div style="display:grid;gap:18px"><span class="kicker">02 — Índice completo</span><h2 data-split>Todo el <em>archivo</em></h2></div>
       <div class="filters" role="group" aria-label="Filtrar por disciplina">
         <button class="chip" data-filter="*" aria-pressed="true">Todo<sup>${proyectos.length}</sup></button>
         ${disciplinas.map(d => `<button class="chip" data-filter="${esc(d)}" aria-pressed="false">${esc(d)}<sup>${counts[d]}</sup></button>`).join('')}
@@ -240,7 +253,7 @@ function home() {
   <div class="wrap">
     <div class="section-head">
       <span class="kicker">03 — Laboratorio</span>
-      <h2 data-split>Un poco de juego</h2>
+      <h2 data-split>Un poco de <em>juego</em></h2>
       <p class="reveal">Algunas de las más de 200 ilustraciones que dibujé para StickerCom. Arrástralas, ordénalas o haz un desastre.</p>
     </div>
     <div class="lab reveal">
@@ -250,11 +263,11 @@ function home() {
   </div>
 </section>
 
-<section class="section" id="proceso">
+<section class="section section--fog" id="proceso">
   <div class="wrap">
     <div class="section-head">
       <span class="kicker">04 — Proceso</span>
-      <h2 data-split>Cómo trabajo, en commits</h2>
+      <h2 data-split>Cómo trabajo, <em>en commits</em></h2>
       <p class="reveal">No hay dos proyectos iguales, pero casi todos pasan por estas etapas. A veces en seis meses, a veces en una noche.</p>
     </div>
     <div class="log">
@@ -271,12 +284,12 @@ function home() {
   </div>
 </section>
 
-<section class="section" id="sobre-mi">
+<section class="section section--paper" id="sobre-mi">
   <div class="wrap about">
     <div>
       <span class="kicker">05 — Sobre mí</span>
       <div class="about-text" style="margin-top:22px">
-        <p class="reveal">Me llaman El Alquimista Digital porque me gusta mezclar disciplinas que casi siempre viven separadas.</p>
+        <figure class="about-quote reveal" style="margin:26px 0 0"><p>Me llaman El Alquimista Digital porque me gusta <em>mezclar</em> disciplinas que casi siempre viven separadas.</p><small>— ${esc(perfil.nombre)}</small></figure>
         <p class="reveal">Vengo del marketing: lideré el departamento de marketing de Beacon 212, donde aprendí que una buena idea sin números no convence a nadie. Me formé como diseñador UX/UI y en la universidad llevé Wander, una app de viajes, desde la investigación hasta el prototipo final.</p>
         <p class="reveal">Hoy diseño y construyo productos completos. StickerCom empezó como ilustraciones en una mesa y terminó siendo una tienda online con pagos, base de datos y publicación automática. Trabajo con la IA como copiloto para llegar más lejos y más rápido, sin delegarle las decisiones.</p>
       </div>
@@ -296,7 +309,7 @@ function home() {
 <section class="contact" id="contacto">
   <div class="wrap">
     <span class="kicker reveal">06 — Contacto</span>
-    <h2 data-split>¿Tienes una idea? Hagámosla real<span class="cursor"></span></h2>
+    <h2 data-split>¿Tienes una idea? Hagámosla <em>real</em><span class="cursor"></span></h2>
     <p class="reveal">Cuéntame qué quieres construir. Respondo personalmente, normalmente en menos de 24 horas.</p>
     <div class="contact-actions reveal">
       <a class="btn" href="https://wa.me/${perfil.whatsapp}?text=${encodeURIComponent('Hola Alejandro, vi tu portafolio y quiero contarte un proyecto.')}" target="_blank" rel="noopener">Escribir por WhatsApp ${ico.arrow}</a>

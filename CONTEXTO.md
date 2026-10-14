@@ -9,6 +9,7 @@ Portafolio de **Alejandro Hurtado** («El Alquimista Digital»): diseño UX/UI, 
 - Estética: oscura, de «sitio para desarrolladores» (referencia: Appwrite en Refero), retícula de fondo, etiquetas monoespaciadas, cursor `_` parpadeante.
 - Paleta (Coolors): `#0D1B2A` fondo · `#1B263B` superficies · `#415A77` líneas/acento · `#778DA9` texto secundario · `#E0E1DD` y **blanco** para el texto.
 - Tipografías: Space Grotesk (títulos), Inter (texto), JetBrains Mono (etiquetas).
+- **Capa «Editorial»** (14/10/2026, a partir del sistema de diseño Steep, `DESIGN (1).md` del usuario; sustituye a una capa «Blueprint» de Buddy que se revirtió): H1/H2 en **Instrument Serif 400** (sustituto libre de Signifier, `src/assets/fonts`) con **una frase en `<em>` cursiva** por titular; artefactos blancos flotantes con sombra suave alrededor de la terminal del héroe (tarjeta de cifra con línea siena, cursor «AH» y compositor «Cuéntame qué quieres construir…» que lleva a contacto); tarjetas planas sin borde con la imagen encajada a 16 px; marquesina en serif cursiva; pliego claro en medio de la noche: Proceso en blanco niebla (`.section--fog`) y Sobre mí en blanco papel (`.section--paper`) con la **única** tarjeta melocotón `#FBE1D1` y texto siena `#5D2A1A`. Botones: la pareja píldora blanca + contorno (la versión oscura de los de Steep). Reglas: la serif nunca en negrita; el melocotón solo una vez por página y sobre blanco.
 
 ## 2. Estructura
 
