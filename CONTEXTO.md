@@ -9,6 +9,7 @@ Portafolio de **Alejandro Hurtado** («El Alquimista Digital»): diseño UX/UI, 
 - Estética: oscura, de «sitio para desarrolladores» (referencia: Appwrite en Refero), retícula de fondo, etiquetas monoespaciadas, cursor `_` parpadeante.
 - Paleta (Coolors): `#0D1B2A` fondo · `#1B263B` superficies · `#415A77` líneas/acento · `#778DA9` texto secundario · `#E0E1DD` y **blanco** para el texto.
 - Tipografías: Space Grotesk (títulos), Inter (texto), JetBrains Mono (etiquetas).
+- **Capa «Blueprint»** (14/10/2026, a partir del sistema de diseño Buddy, `DESIGN.md` del usuario): lima `#BFFF5A` como único color de acción (botones principales y flecha de tarjetas), trazo arcoíris `.mark` bajo **una** palabra clave por titular, arco de color `.arc` en el borde superior de tarjetas (tono por posición con `--hue`: cian, menta, cítrico, orquídea, ámbar), menú en cápsula que marca la sección visible, etiquetas mono con tracking amplio y guion de espectro, hojas de papel milimetrado claras (laboratorio y sección Proceso con `.section--paper`) y la tarjeta ámbar para el aprendizaje de cada caso. Tokens en `:root` de `estilos.css`. Regla: la lima nunca como fondo grande; el arcoíris solo en trazos, arcos y la tarjeta ámbar.
 
 ## 2. Estructura
 
