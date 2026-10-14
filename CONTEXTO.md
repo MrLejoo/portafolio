@@ -66,7 +66,7 @@ Varios textos se **redactaron a partir del material** porque no había descripci
 - **GitHub:** https://github.com/MrLejoo/portafolio (público, rama `main`). El remoto es `https://MrLejoo@github.com/MrLejoo/portafolio.git`: el usuario va en la URL para que Windows guarde esta credencial aparte de la de StickerCom (`contactstickercom-code`).
 - **Cloudflare Pages:** proyecto `alejandrohurtadomartin` → https://alejandrohurtadomartin.pages.dev. Framework preset **None** · Build command `npm run build` · Output `dist` · variables `SITE_URL` y `NODE_VERSION=20`.
 - Cada `git push` a `main` publica en producción en 1-2 minutos.
-- **Ramas de prueba:** cualquier otra rama publica una vista previa en `https://<rama>.alejandrohurtadomartin.pages.dev` (con `noindex`). Úsala para cambios grandes: probar ahí y luego `git merge --ff-only` a `main`. Ejemplo: la rama `rendimiento`.
+- **Ramas de prueba:** cualquier otra rama publica una vista previa en `https://<rama>.alejandrohurtadomartin.pages.dev` (con `noindex`). Úsala para cambios grandes: probar ahí y luego `git merge --ff-only` a `main`. Al terminar, borrar la rama (`git branch -d <rama>` y `git push origin --delete <rama>`); su vista previa queda en Cloudflare hasta borrarla en *Deployments*. Hoy solo existe `main`.
 
 ## 5b. Rendimiento y escala (07/10/2026)
 
