@@ -107,11 +107,9 @@ function header(path) {
     <span class="status"><i></i>Disponible para proyectos</span>
     <button class="menu-btn" aria-label="Abrir menú" aria-expanded="false" aria-controls="nav"><span></span></button>
     <nav class="nav" id="nav" aria-label="Principal">
-      <div class="nav-links">
-        <a href="${l('#proyectos')}">Proyectos</a>
-        <a href="${l('#proceso')}">Proceso</a>
-        <a href="${l('#sobre-mi')}">Sobre mí</a>
-      </div>
+      <a href="${l('#proyectos')}">Proyectos</a>
+      <a href="${l('#proceso')}">Proceso</a>
+      <a href="${l('#sobre-mi')}">Sobre mí</a>
       <a class="btn" href="${l('#contacto')}">Hablemos ${ico.arrow}</a>
     </nav>
   </div>
@@ -134,10 +132,6 @@ function footer() {
 
 /* Piezas ---------------------------------------------------------------- */
 const coverOf = p => p.portada || null;
-// Espectro Blueprint: cian, menta, cítrico, orquídea y ámbar, en ese orden
-const HUES = ['var(--h-cyan)', 'var(--h-mint)', 'var(--h-citron)', 'var(--h-orchid)', 'var(--h-amber)'];
-const hue = i => HUES[i % HUES.length];
-const arc = '<span class="arc" aria-hidden="true"></span>';
 
 function typeCover(p) {
   const m = p.metricas?.[0];
@@ -146,8 +140,7 @@ function typeCover(p) {
 
 function card(p, size, i) {
   const c = coverOf(p);
-  return `<a class="card card--${size} reveal" style="--d:${(i % 3) * 0.08}s;--hue:${hue(i)}" href="/proyectos/${p.slug}/">
-    ${arc}
+  return `<a class="card card--${size} reveal" style="--d:${(i % 3) * 0.08}s" href="/proyectos/${p.slug}/">
     <div class="card-media">${c ? img(c, {}) : typeCover(p)}</div>
     <span class="card-arrow">${ico.arrow}</span>
     <div class="card-body">
@@ -177,7 +170,7 @@ function home() {
   <div class="wrap">
     <div>
       <span class="kicker reveal">Portafolio · ${esc(perfil.ciudad)}</span>
-      <h1 data-split>Diseño, escribo y construyo productos <span class="soft">que la gente <span class="mark">entiende</span></span><span class="cursor"></span></h1>
+      <h1 data-split>Diseño, escribo y construyo productos <span class="soft">que la gente entiende</span><span class="cursor"></span></h1>
       <p class="hero-lead reveal" style="--d:.35s">Soy <strong>${esc(perfil.nombre)}</strong>: diseñador UX/UI, desarrollador web y copywriter. Del primer minuto de investigación al código en producción, con una idea fija: que cada pantalla tenga una razón de existir.</p>
       <div class="hero-cta reveal" style="--d:.5s">
         <a class="btn" href="#proyectos">Ver proyectos ${ico.arrow}</a>
@@ -191,7 +184,6 @@ function home() {
       </div>
     </div>
     <div class="terminal reveal" style="--d:.25s" aria-label="Perfil en formato de código">
-      <span class="arc arc--spectrum" aria-hidden="true"></span>
       <div class="terminal-bar"><i></i><i></i><i></i><span>~/alquimista — perfil.json</span></div>
 <pre data-type><span class="t-prompt">$</span> cat perfil.json
 {
@@ -218,7 +210,7 @@ function home() {
   <div class="wrap">
     <div class="section-head">
       <span class="kicker">01 — Trabajo seleccionado</span>
-      <h2 data-split>Proyectos que cuentan cómo <span class="mark">pienso</span></h2>
+      <h2 data-split>Proyectos que cuentan cómo pienso</h2>
       <p class="reveal">Cada caso explica la intención, el reto y el camino completo, paso a paso, desde la primera pregunta hasta el resultado.</p>
     </div>
     <div class="bento">${destacados.map((p, i) => card(p, destacados.length % 2 && i === destacados.length - 1 ? 'full' : i % 4 === 0 || i % 4 === 3 ? 'xl' : 'l', i)).join('')}</div>
@@ -228,7 +220,7 @@ function home() {
 <section class="section" id="indice" style="padding-top:0">
   <div class="wrap">
     <div class="section-head section-head--row">
-      <div style="display:grid;gap:18px"><span class="kicker">02 — Índice completo</span><h2 data-split>Todo el <span class="mark">archivo</span></h2></div>
+      <div style="display:grid;gap:18px"><span class="kicker">02 — Índice completo</span><h2 data-split>Todo el archivo</h2></div>
       <div class="filters" role="group" aria-label="Filtrar por disciplina">
         <button class="chip" data-filter="*" aria-pressed="true">Todo<sup>${proyectos.length}</sup></button>
         ${disciplinas.map(d => `<button class="chip" data-filter="${esc(d)}" aria-pressed="false">${esc(d)}<sup>${counts[d]}</sup></button>`).join('')}
@@ -248,7 +240,7 @@ function home() {
   <div class="wrap">
     <div class="section-head">
       <span class="kicker">03 — Laboratorio</span>
-      <h2 data-split>Un poco de <span class="mark">juego</span></h2>
+      <h2 data-split>Un poco de juego</h2>
       <p class="reveal">Algunas de las más de 200 ilustraciones que dibujé para StickerCom. Arrástralas, ordénalas o haz un desastre.</p>
     </div>
     <div class="lab reveal">
@@ -258,12 +250,11 @@ function home() {
   </div>
 </section>
 
-<section class="section section--paper" id="proceso">
-  <div class="sheet-tag" aria-hidden="true"><span>hoja 04</span><span>proceso</span><span>escala 1:1</span></div>
+<section class="section" id="proceso">
   <div class="wrap">
     <div class="section-head">
       <span class="kicker">04 — Proceso</span>
-      <h2 data-split>Cómo trabajo, en <span class="mark">commits</span></h2>
+      <h2 data-split>Cómo trabajo, en commits</h2>
       <p class="reveal">No hay dos proyectos iguales, pero casi todos pasan por estas etapas. A veces en seis meses, a veces en una noche.</p>
     </div>
     <div class="log">
@@ -275,7 +266,7 @@ function home() {
         ['d4b8c71', 'escribir', 'Las palabras también son interfaz', 'Microcopy, mensajes de error, titulares y llamadas a la acción. El texto decide si un botón se pulsa.'],
         ['e61f2d3', 'construir', 'Del prototipo a producción', 'HTML, CSS y JavaScript ligeros, bases de datos con reglas de seguridad y publicación automática en cada cambio.'],
         ['f3a7b90', 'medir', 'Aprender y volver a empezar', 'Analítica, mapas de calor y lo que dicen los clientes. Cada versión es la hipótesis de la siguiente.'],
-      ].map(([h, f, t, d], k) => `<div class="log-item" style="--hue:${hue(k)}"><span class="log-dot"></span><div class="log-card reveal">${arc}<div class="log-meta"><span class="hash">${h}</span><span>feat(${f})</span></div><h3>${t}</h3><p>${d}</p></div></div>`).join('')}
+      ].map(([h, f, t, d]) => `<div class="log-item"><span class="log-dot"></span><div class="reveal"><div class="log-meta"><span class="hash">${h}</span><span>feat(${f})</span></div><h3>${t}</h3><p>${d}</p></div></div>`).join('')}
     </div>
   </div>
 </section>
@@ -285,7 +276,7 @@ function home() {
     <div>
       <span class="kicker">05 — Sobre mí</span>
       <div class="about-text" style="margin-top:22px">
-        <p class="reveal">Me llaman El Alquimista Digital porque me gusta <span class="mark">mezclar</span> disciplinas que casi siempre viven separadas.</p>
+        <p class="reveal">Me llaman El Alquimista Digital porque me gusta mezclar disciplinas que casi siempre viven separadas.</p>
         <p class="reveal">Vengo del marketing: lideré el departamento de marketing de Beacon 212, donde aprendí que una buena idea sin números no convence a nadie. Me formé como diseñador UX/UI y en la universidad llevé Wander, una app de viajes, desde la investigación hasta el prototipo final.</p>
         <p class="reveal">Hoy diseño y construyo productos completos. StickerCom empezó como ilustraciones en una mesa y terminó siendo una tienda online con pagos, base de datos y publicación automática. Trabajo con la IA como copiloto para llegar más lejos y más rápido, sin delegarle las decisiones.</p>
       </div>
@@ -297,7 +288,7 @@ function home() {
         ['Copywriting', 'ES · EN', 'Landings, anuncios de respuesta directa, correos en frío, guiones y microcopy de producto.'],
         ['Diseño gráfico', 'Illustrator · Photoshop', 'Ilustración, piezas para redes, gran formato y archivos listos para imprenta.'],
         ['Motion y foto', 'Video · Cámara', 'Reels de producto, making of y fotografía que entrena el ojo para componer.'],
-      ].map(([t, s, d], i) => `<div class="skill reveal" style="--d:${i * .06}s;--hue:${hue(i)}">${arc}<h3>${t}<span>${s}</span></h3><p>${d}</p></div>`).join('')}
+      ].map(([t, s, d], i) => `<div class="skill reveal" style="--d:${i * .06}s"><h3>${t}<span>${s}</span></h3><p>${d}</p></div>`).join('')}
     </div>
   </div>
 </section>
@@ -305,7 +296,7 @@ function home() {
 <section class="contact" id="contacto">
   <div class="wrap">
     <span class="kicker reveal">06 — Contacto</span>
-    <h2 data-split>¿Tienes una idea? Hagámosla <span class="mark">real</span><span class="cursor"></span></h2>
+    <h2 data-split>¿Tienes una idea? Hagámosla real<span class="cursor"></span></h2>
     <p class="reveal">Cuéntame qué quieres construir. Respondo personalmente, normalmente en menos de 24 horas.</p>
     <div class="contact-actions reveal">
       <a class="btn" href="https://wa.me/${perfil.whatsapp}?text=${encodeURIComponent('Hola Alejandro, vi tu portafolio y quiero contarte un proyecto.')}" target="_blank" rel="noopener">Escribir por WhatsApp ${ico.arrow}</a>

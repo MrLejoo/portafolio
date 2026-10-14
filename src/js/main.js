@@ -243,15 +243,8 @@
   const bar = $('.progress');
   const tocLinks = $$('.toc a');
   const chapters = tocLinks.map(a => $(a.getAttribute('href'))).filter(Boolean);
-  // Menú en cápsula: se ilumina la sección que cruza el centro de la pantalla
-  const spy = $$('.nav-links a[href^="#"]').map(a => [a, $(a.getAttribute('href'))]).filter(([, s]) => s);
   const onFrame = () => {
     const vh = innerHeight;
-    spy.forEach(([a, s]) => {
-      const r = s.getBoundingClientRect();
-      if (r.top < vh * .45 && r.bottom > vh * .45) a.setAttribute('aria-current', 'true');
-      else a.removeAttribute('aria-current');
-    });
     fills.forEach(el => {
       const r = el.parentElement.getBoundingClientRect();
       const p = Math.max(0, Math.min(1, (vh * .62 - r.top) / r.height));
