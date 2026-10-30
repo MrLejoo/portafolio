@@ -1,6 +1,6 @@
 # Migrar el portafolio a otro ordenador
 
-> Guía para mover el proyecto **Portafolio · El Alquimista Digital** a una computadora nueva y seguir trabajando igual, también con Claude.
+> Guía para mover el proyecto **Portafolio de Alejandro Hurtado Martín** a una computadora nueva y seguir trabajando igual, también con Claude.
 > Creada el 08/10/2026. Complementa a [`CONTEXTO.md`](CONTEXTO.md), que explica cómo está hecho el proyecto.
 
 ---

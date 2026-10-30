@@ -1,68 +1,225 @@
-// Interacciones del portafolio: sin dependencias, respetando prefers-reduced-motion.
+// Interacciones y escenas del portafolio. GSAP, ScrollTrigger y Lenis llegan unidos a este archivo (ver build.mjs).
+// Sin movimiento (prefers-reduced-motion) no se añade html.fx: la página queda apilada y estática.
 (() => {
   const $ = (s, c = document) => c.querySelector(s);
   const $$ = (s, c = document) => [...c.querySelectorAll(s)];
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const ancho = matchMedia('(min-width: 900px)').matches;
+  const root = document.documentElement;
+  const G = window.gsap, ST = window.ScrollTrigger;
+  const fx = !reduce && !!G && !!ST;
+  let lenis = null;
 
-  /* Cabecera: fondo al hacer scroll y se esconde al bajar ------------------ */
-  const header = $('.header');
-  let lastY = scrollY;
-  const onScroll = () => {
-    const y = scrollY;
-    header?.classList.toggle('is-scrolled', y > 20);
-    header?.classList.toggle('is-hidden', y > 400 && y > lastY && !document.body.classList.contains('menu-open'));
-    lastY = y;
-  };
-  addEventListener('scroll', onScroll, { passive: true });
-  onScroll();
+  if (fx) {
+    root.classList.add('fx');
+    G.registerPlugin(ST);
+    ST.config({ ignoreMobileResize: true });
+    if (fine && window.Lenis) {
+      lenis = new window.Lenis({ duration: 1.1, smoothWheel: true });
+      lenis.on('scroll', ST.update);
+      G.ticker.add(t => lenis.raf(t * 1000));
+      G.ticker.lagSmoothing(0);
+    }
+  }
 
-  /* Menú móvil */
+  /* Menú móvil y anclas ---------------------------------------------------- */
   const menuBtn = $('.menu-btn');
   menuBtn?.addEventListener('click', () => {
     const open = document.body.classList.toggle('menu-open');
     menuBtn.setAttribute('aria-expanded', open);
+    $('span', menuBtn).textContent = open ? 'Cerrar' : 'Menú';
   });
   $$('.nav a').forEach(a => a.addEventListener('click', () => {
     document.body.classList.remove('menu-open');
     menuBtn?.setAttribute('aria-expanded', 'false');
+    if (menuBtn) $('span', menuBtn).textContent = 'Menú';
+  }));
+  if (lenis) $$('a[href^="#"]').forEach(a => a.addEventListener('click', e => {
+    const t = $(a.getAttribute('href'));
+    if (t) { e.preventDefault(); lenis.scrollTo(t); }
   }));
 
-  /* Texto dividido en palabras para la entrada ----------------------------- */
-  $$('[data-split]').forEach(el => {
-    let i = 0;
-    const walk = node => {
-      [...node.childNodes].forEach(n => {
-        if (n.nodeType === 3) {
-          const frag = document.createDocumentFragment();
-          n.textContent.split(/(\s+)/).forEach(part => {
-            if (!part) return;
-            if (/^\s+$/.test(part)) { frag.append(part); return; }
-            const w = document.createElement('span');
-            w.className = 'w';
-            const s = document.createElement('span');
-            s.style.setProperty('--i', i++);
-            s.textContent = part;
-            w.append(s);
-            frag.append(w);
-          });
-          n.replaceWith(frag);
-        } else if (n.nodeType === 1 && !n.classList.contains('cursor')) walk(n);
-      });
-    };
+  /* Titulares: palabras enmascaradas --------------------------------------- */
+  const partir = el => {
+    const walk = node => [...node.childNodes].forEach(n => {
+      if (n.nodeType === 3) {
+        const frag = document.createDocumentFragment();
+        n.textContent.split(/(\s+)/).forEach(part => {
+          if (!part) return;
+          if (/^\s+$/.test(part)) { frag.append(part); return; }
+          const w = document.createElement('span'); w.className = 'linea';
+          const s = document.createElement('span'); s.textContent = part;
+          w.append(s); frag.append(w);
+        });
+        n.replaceWith(frag);
+      } else if (n.nodeType === 1) walk(n);
+    });
     walk(el);
-    el.classList.add('split');
+  };
+
+  // Frases que se encienden palabra a palabra con el scroll.
+  const luz = el => {
+    el.innerHTML = el.textContent.trim().split(/\s+/).map(w => `<span class="pal">${w}</span>`).join(' ');
+  };
+
+  if (fx) {
+    $$('[data-lines]').forEach(el => {
+      partir(el);
+      G.from($$('.linea > span', el), { yPercent: 110, rotate: 4, duration: 1, stagger: .07, ease: 'expo.out', scrollTrigger: { trigger: el, start: 'top 88%', once: true } });
+    });
+    $$('.rv').forEach(el => G.from(el, { y: 34, autoAlpha: 0, duration: .9, ease: 'expo.out', scrollTrigger: { trigger: el, start: 'top 94%', once: true } }));
+    $$('[data-luz]').forEach(el => {
+      luz(el);
+      G.to($$('.pal', el), { opacity: 1, stagger: .08, ease: 'none', scrollTrigger: { trigger: el, start: 'top 78%', end: 'bottom 52%', scrub: .4 } });
+    });
+    $$('.figure, .copy-piece, .insight').forEach(el => G.from(el, { y: 70, rotate: 1.6, autoAlpha: 0, duration: 1.1, ease: 'expo.out', scrollTrigger: { trigger: el, start: 'top 92%', once: true } }));
+  }
+
+  /* Portada: del póster al muro entrando por la O -------------------------- */
+  const hero = $('.hero');
+  if (hero && fx) {
+    const nombre = $('.nombre'), portal = $('.portal'), o = $('.o'), pegados = $$('.pegado');
+    // El hueco de la O: centro y radios en proporción al tamaño de la letra.
+    const K = { cy: .52, rx: .2, ry: .29 };
+    let cx, cy, rx, ry;
+    const medir = () => {
+      G.set(nombre, { scale: 1, clearProps: 'transformOrigin' });
+      // Se mide sobre la fila, que no se mueve durante la entrada de las letras.
+      const r = o.getBoundingClientRect(), f = o.parentElement.getBoundingClientRect(), h = hero.getBoundingClientRect();
+      const fs = parseFloat(getComputedStyle(o).fontSize);
+      cx = r.left + r.width / 2 - h.left; cy = f.top + f.height * K.cy - h.top;
+      rx = fs * K.rx; ry = fs * K.ry;
+      G.set(nombre, { transformOrigin: `${cx}px ${cy}px` });
+    };
+    const zoom = { s: 1 };
+    const pintar = () => {
+      G.set(nombre, { scale: Math.min(zoom.s, 30), force3D: false });
+      portal.style.clipPath = `ellipse(${rx * zoom.s}px ${ry * zoom.s}px at ${cx}px ${cy}px)`;
+    };
+    medir(); pintar();
+    ST.addEventListener('refreshInit', () => { medir(); pintar(); });
+    document.fonts?.ready.then(() => { medir(); pintar(); ST.refresh(); });
+
+    // Entrada: letras que caen y stickers que se pegan de golpe.
+    G.from($$('.l', nombre), { yPercent: 115, duration: 1.1, ease: 'expo.out', stagger: { each: .03, from: 'random' } });
+    G.from(pegados, { scale: 2.1, autoAlpha: 0, rotate: () => G.utils.random(-40, 40), duration: .55, ease: 'back.out(2.4)', stagger: .07, delay: .55 });
+    G.from('.hero-nota, .hero-rol', { autoAlpha: 0, duration: .8, delay: 1.5 });
+    G.fromTo('.garabato path', { strokeDasharray: 1, strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 1, delay: 1.7, ease: 'power2.inOut' });
+
+    const tl = G.timeline({ defaults: { ease: 'none' }, scrollTrigger: { trigger: hero, start: 'top top', end: ancho ? '+=340%' : '+=280%', pin: true, scrub: .5, anticipatePin: 1 } });
+    tl.to('.hero-nota, .hero-rol', { autoAlpha: 0, duration: .08 }, 0);
+    pegados.forEach(p => {
+      const r = p.getBoundingClientRect(), dx = r.left + r.width / 2 - innerWidth / 2, dy = r.top + r.height / 2 - innerHeight / 2;
+      tl.to(p, { x: dx * 1.5, y: dy * 1.5, rotate: G.utils.random(-70, 70), autoAlpha: 0, duration: .24, ease: 'power2.in' }, 0);
+    });
+    tl.to(zoom, { s: 70, duration: .5, ease: 'expo.in', onUpdate: pintar }, .04);
+    tl.set(nombre, { autoAlpha: 0 }, .55);
+    tl.set(portal, { clipPath: 'none' }, .56);
+    tl.fromTo('.muro', { rotate: -7, scale: 1.3 }, { rotate: 0, scale: 1, duration: .55 }, .1);
+    $$('.muro-col').forEach((c, i) => tl.to(c, { yPercent: i % 2 ? 14 : -14, duration: .9 }, .1));
+    tl.to('.portal-velo', { opacity: 1, duration: .14 }, .62);
+    tl.set('.portal-frase', { visibility: 'visible' }, .62);
+    tl.fromTo('.portal-frase span, .portal-frase em', { yPercent: 60, autoAlpha: 0 }, { yPercent: 0, autoAlpha: 1, duration: .14, stagger: .06, ease: 'power3.out' }, .63);
+
+    // Parallax leve de la trama según la profundidad.
+    G.to('.hero .trama', { yPercent: -8, scrollTrigger: { trigger: hero, start: 'top top', end: '+=340%', scrub: true } });
+  } else if (hero && !fx) {
+    $$('.pegado').forEach(p => { p.style.position = 'absolute'; });
+  }
+
+  if (!fine) { const n = $('.hero-nota span'); if (n) n.textContent = 'desliza hacia abajo'; }
+
+  /* Stickers que se despegan (portada) ------------------------------------- */
+  const arrastre = (el, { limite, alSoltar } = {}) => {
+    el.addEventListener('pointerdown', e => {
+      if (e.pointerType === 'touch' && !el.classList.contains('sticker')) return;
+      e.preventDefault();
+      el.setPointerCapture(e.pointerId);
+      el.classList.add('is-drag');
+      el.style.zIndex = ++arrastre.z;
+      el._x ??= 0; el._y ??= 0; el._r ??= 0;
+      const ox = e.clientX - el._x, oy = e.clientY - el._y;
+      let lx = e.clientX, vx = 0;
+      const move = ev => {
+        vx = ev.clientX - lx; lx = ev.clientX;
+        let x = ev.clientX - ox, y = ev.clientY - oy;
+        if (limite) [x, y] = limite(x, y);
+        el._x = x; el._y = y;
+        el.style.transform = `translate(${x}px, ${y}px) rotate(${el._r + vx * .9}deg)`;
+      };
+      const up = () => {
+        el.classList.remove('is-drag');
+        el._r += vx * .9;
+        el.style.transform = `translate(${el._x}px, ${el._y}px) rotate(${el._r}deg)`;
+        el.removeEventListener('pointermove', move);
+        el.removeEventListener('pointerup', up);
+        el.removeEventListener('pointercancel', up);
+        alSoltar?.();
+      };
+      el.addEventListener('pointermove', move);
+      el.addEventListener('pointerup', up);
+      el.addEventListener('pointercancel', up);
+    });
+  };
+  arrastre.z = 5;
+  // Un envoltorio interior evita pelearse con los transform de GSAP en el sticker de portada.
+  if (fine) $$('.pegado').forEach(p => {
+    const inner = document.createElement('div');
+    inner.className = 'pegado-in';
+    inner.append(...p.childNodes);
+    p.append(inner);
+    arrastre(inner);
   });
 
-  /* Aparición al entrar en pantalla ---------------------------------------- */
-  const io = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (!e.isIntersecting) return;
-      e.target.classList.add('is-in');
-      io.unobserve(e.target);
+  /* Carteles: scroll horizontal en escritorio, pila en móvil --------------- */
+  const carril = $('.carril');
+  if (carril && fx) {
+    const seccion = $('.trabajo');
+    if (ancho) {
+      const dist = () => carril.scrollWidth - innerWidth;
+      const mov = G.to(carril, { x: () => -dist(), ease: 'none', scrollTrigger: { trigger: seccion, pin: true, scrub: .6, start: 'top top', end: () => `+=${dist() * .78}`, invalidateOnRefresh: true, anticipatePin: 1 } });
+      $$('.cartel').forEach(c => {
+        $$('.capa', c).forEach(k => G.fromTo(k, { x: () => 110 * k.dataset.v }, { x: () => -110 * k.dataset.v, ease: 'none', scrollTrigger: { trigger: c, containerAnimation: mov, start: 'left right', end: 'right left', scrub: true } }));
+        G.fromTo($('h3', c), { xPercent: 5 }, { xPercent: -3, ease: 'none', scrollTrigger: { trigger: c, containerAnimation: mov, start: 'left right', end: 'right left', scrub: true } });
+      });
+    } else {
+      $$('.cartel').forEach(c => $$('.capa', c).forEach(k => G.from(k, { y: 70 * k.dataset.v, autoAlpha: 0, duration: 1, ease: 'expo.out', scrollTrigger: { trigger: c, start: 'top 70%', once: true } })));
+    }
+  }
+
+  /* Foto a sangre: ventana que se abre ------------------------------------- */
+  const mirada = $('.mirada');
+  if (mirada && fx) {
+    const tl = G.timeline({ defaults: { ease: 'none' }, scrollTrigger: { trigger: mirada, start: 'top top', end: '+=130%', pin: true, scrub: .5 } });
+    tl.fromTo('.mirada-foto', { clipPath: 'inset(32% 34% 32% 34% round 18px)' }, { clipPath: 'inset(0% 0% 0% 0% round 0px)', duration: 1 }, 0)
+      .fromTo('.mirada-foto img', { scale: 1.5 }, { scale: 1, duration: 1 }, 0)
+      .fromTo('.mirada-texto', { color: '#111014', scale: .86 }, { color: '#ffffff', scale: 1, duration: .55 }, .1);
+  }
+
+  /* Pasos: la carta de debajo se hunde ------------------------------------- */
+  const pasos = $$('.paso');
+  if (pasos.length && fx) {
+    pasos.forEach((p, i) => {
+      G.from($('.paso-sticker', p), { scale: .5, rotate: -30, duration: 1, ease: 'back.out(1.8)', scrollTrigger: { trigger: p, start: 'top 45%', toggleActions: 'play none none reverse' } });
+      if (i < pasos.length - 1) G.to(p, { scale: .93, ease: 'none', transformOrigin: '50% 0', scrollTrigger: { trigger: pasos[i + 1], start: 'top bottom', end: 'top top', scrub: true } });
     });
-  }, { rootMargin: '0px 0px -12% 0px', threshold: .08 });
-  $$('.reveal, .split, .p-cover, .rm-step, .log-item, .insight, [data-count]').forEach(el => io.observe(el));
+  }
+
+  /* Hablemos: letras que saltan -------------------------------------------- */
+  const hablemos = $('.hablemos');
+  if (hablemos && fx) {
+    G.from($$('.l', hablemos), { yPercent: 110, rotate: () => G.utils.random(-14, 14), duration: 1, ease: 'back.out(1.7)', stagger: .045, scrollTrigger: { trigger: hablemos, start: 'top 92%', once: true } });
+    if (fine) $$('.l', hablemos).forEach(l => l.addEventListener('pointerenter', () => G.fromTo(l, { y: 0 }, { y: -26, rotate: G.utils.random(-10, 10), duration: .2, yoyo: true, repeat: 1, ease: 'power2.out', onComplete: () => G.set(l, { rotate: 0 }) })));
+  }
+  if (fx) $$('.sello').forEach((s, i) => G.from(s, { scale: 0, rotate: -50, duration: .8, delay: i * .1, ease: 'back.out(2)', scrollTrigger: { trigger: s, start: 'top 92%', once: true } }));
+
+  /* Portada del caso: se endereza con el scroll ---------------------------- */
+  const cp = $('.c-portada');
+  if (cp && fx) {
+    G.from(cp, { y: 80, rotate: 2.5, autoAlpha: 0, duration: 1.2, ease: 'expo.out' });
+    G.to($('img', cp) || cp, { scale: 1.07, ease: 'none', scrollTrigger: { trigger: cp, start: 'top 40%', end: 'bottom top', scrub: true } });
+  }
 
   /* Contadores ------------------------------------------------------------- */
   const countIO = new IntersectionObserver(entries => {
@@ -75,7 +232,7 @@
       if (!m || reduce || /→|\//.test(raw)) return;
       const target = parseFloat(m[2].replace(/\./g, '').replace(',', '.'));
       const decimals = (m[2].split(',')[1] || '').length;
-      const t0 = performance.now(), dur = 1400;
+      const t0 = performance.now(), dur = 1300;
       const tick = t => {
         const k = Math.min(1, (t - t0) / dur), v = target * (1 - Math.pow(1 - k, 4));
         el.textContent = m[1] + v.toLocaleString('es-VE', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }) + m[3];
@@ -86,85 +243,14 @@
   }, { threshold: .6 });
   $$('[data-count]').forEach(el => countIO.observe(el));
 
-  /* Efecto "decodificar" en textos marcados -------------------------------- */
-  const glyphs = '!<>-_\\/[]{}=+*^?#01';
-  const scramble = el => {
-    const text = el.dataset.text || el.textContent;
-    el.dataset.text = text;
-    if (reduce) return;
-    let frame = 0;
-    const queue = [...text].map((c, i) => ({ c, start: Math.floor(Math.random() * 12) + i * .6, end: Math.floor(Math.random() * 12) + 14 + i * .6 }));
-    const run = () => {
-      let out = '', done = 0;
-      queue.forEach(q => {
-        if (frame >= q.end) { out += q.c; done++; }
-        else if (frame >= q.start && q.c !== ' ') out += glyphs[Math.floor(Math.random() * glyphs.length)];
-        else out += q.c === ' ' ? ' ' : '';
-      });
-      el.textContent = out;
-      frame++;
-      if (done < queue.length) requestAnimationFrame(run);
-    };
-    run();
-  };
-  $$('[data-scramble]').forEach(el => {
-    const sio = new IntersectionObserver(([e]) => { if (e.isIntersecting) { scramble(el); sio.disconnect(); } });
-    sio.observe(el);
-    if (fine) el.addEventListener('mouseenter', () => scramble(el));
-  });
-
-  /* Terminal que se escribe sola ------------------------------------------- */
-  const term = $('[data-type]');
-  if (term) {
-    const html = term.innerHTML;
-    if (!reduce) {
-      const tmp = document.createElement('div');
-      tmp.innerHTML = html;
-      const tokens = [];
-      const collect = (node, wrap) => node.childNodes.forEach(n => {
-        if (n.nodeType === 3) [...n.textContent].forEach(ch => tokens.push({ ch, wrap }));
-        else collect(n, n.className);
-      });
-      collect(tmp, null);
-      // Reserva el alto final antes de vaciarla: así escribir no empuja el contenido de abajo (CLS).
-      term.style.minHeight = `${term.offsetHeight}px`;
-      term.innerHTML = '';
-      let i = 0, cur = null, curCls;
-      const caret = document.createElement('span');
-      caret.className = 'cursor';
-      term.append(caret);
-      const step = () => {
-        const n = Math.min(tokens.length, i + (tokens[i]?.ch === '\n' ? 1 : 3));
-        for (; i < n; i++) {
-          const t = tokens[i];
-          if (!cur || curCls !== t.wrap) {
-            cur = t.wrap ? Object.assign(document.createElement('span'), { className: t.wrap }) : document.createTextNode('');
-            curCls = t.wrap;
-            term.insertBefore(cur, caret);
-          }
-          cur.textContent += t.ch;
-        }
-        if (i < tokens.length) setTimeout(step, tokens[i - 1]?.ch === '\n' ? 140 : 16);
-      };
-      setTimeout(step, 700);
-    }
-  }
-
-  /* Luz que sigue al cursor en las tarjetas -------------------------------- */
-  if (fine) $$('.card').forEach(card => card.addEventListener('pointermove', e => {
-    const r = card.getBoundingClientRect();
-    card.style.setProperty('--mx', `${e.clientX - r.left}px`);
-    card.style.setProperty('--my', `${e.clientY - r.top}px`);
-  }));
-
-  /* Índice: filtros y vista previa flotante -------------------------------- */
+  /* Archivo: filtros y vista previa flotante ------------------------------- */
   const chips = $$('.chip[data-filter]');
   chips.forEach(chip => chip.addEventListener('click', () => {
     const f = chip.dataset.filter;
     chips.forEach(c => c.setAttribute('aria-pressed', c === chip));
-    $$('.index li').forEach(li => { li.hidden = f !== '*' && !li.dataset.tags.split('|').includes(f); });
-    const shown = $$('.index li:not([hidden])');
-    shown.forEach((li, k) => { li.style.animation = 'none'; li.offsetHeight; li.style.animation = reduce ? '' : `fade .5s ${k * 40}ms both`; });
+    $$('.indice li').forEach(li => { li.hidden = f !== '*' && !li.dataset.tags.split('|').includes(f); });
+    const shown = $$('.indice li:not([hidden])');
+    if (fx) { G.fromTo(shown, { x: -24, autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: .5, stagger: .03, ease: 'expo.out', overwrite: true }); ST.refresh(); }
     const live = $('#index-live');
     if (live) live.textContent = `${shown.length} proyectos`;
   }));
@@ -173,11 +259,11 @@
     const img = $('img', preview);
     let x = 0, y = 0, tx = 0, ty = 0, raf;
     const loop = () => {
-      x += (tx - x) * .16; y += (ty - y) * .16;
-      preview.style.transform = `translate(${x + 24}px, ${y - 110}px) rotate(${(tx - x) * .03}deg)`;
+      x += (tx - x) * .14; y += (ty - y) * .14;
+      preview.style.transform = `translate(${x + 26}px, ${y - 120}px) rotate(${(tx - x) * .035}deg)`;
       raf = requestAnimationFrame(loop);
     };
-    $$('.index a').forEach(a => {
+    $$('.indice a').forEach(a => {
       a.addEventListener('pointerenter', () => {
         if (!a.dataset.img) return;
         img.src = a.dataset.img;
@@ -189,79 +275,43 @@
     });
   }
 
-  /* Laboratorio: stickers que se arrastran --------------------------------- */
+  /* Mesa de juego ---------------------------------------------------------- */
   const lab = $('.lab');
   if (lab) {
     const items = $$('.sticker', lab);
     const place = () => {
       const W = lab.clientWidth, H = lab.clientHeight;
-      items.forEach((s, k) => {
-        const sz = s.offsetWidth || 110;
-        const a = (k / items.length) * Math.PI * 2 + Math.random() * .4;
-        const rx = (W / 2 - sz * .7) * (.45 + Math.random() * .55), ry = (H / 2 - sz * .7) * (.45 + Math.random() * .55);
-        s._x = W / 2 + Math.cos(a) * rx - sz / 2;
-        s._y = H / 2 + Math.sin(a) * ry - sz / 2;
-        s._r = Math.random() * 30 - 15;
-        s.style.transform = `translate(${s._x}px, ${s._y}px) rotate(${s._r}deg)`;
+      // Retícula barajada con desorden: reparte los stickers por toda la mesa sin amontonarlos.
+      const vis = items.filter(s => s.offsetWidth);
+      const cols = Math.ceil(Math.sqrt(vis.length * W / H)), rows = Math.ceil(vis.length / cols);
+      const celdas = Array.from({ length: cols * rows }, (_, i) => i).sort(() => Math.random() - .5);
+      vis.forEach((s, k) => {
+        const sz = s.offsetWidth, cw = W / cols, ch = H / rows;
+        s._x = Math.max(0, Math.min(W - sz, (celdas[k] % cols + .5) * cw - sz / 2 + (Math.random() - .5) * cw * .5));
+        s._y = Math.max(0, Math.min(H - sz, (Math.floor(celdas[k] / cols) + .5) * ch - sz / 2 + (Math.random() - .5) * ch * .5));
+        s._r = Math.random() * 40 - 20;
+        if (fx) G.to(s, { x: s._x, y: s._y, rotate: s._r, duration: .9, ease: 'expo.out', delay: k * .012, overwrite: true, onComplete: () => { G.set(s, { clearProps: 'transform' }); s.style.transform = `translate(${s._x}px, ${s._y}px) rotate(${s._r}deg)`; } });
+        else s.style.transform = `translate(${s._x}px, ${s._y}px) rotate(${s._r}deg)`;
       });
     };
     place();
-    let z = 1;
-    items.forEach(s => {
-      s.addEventListener('pointerdown', e => {
-        e.preventDefault();
-        s.setPointerCapture(e.pointerId);
-        s.classList.add('is-drag');
-        s.style.zIndex = ++z;
-        const ox = e.clientX - s._x, oy = e.clientY - s._y;
-        let lx = e.clientX, vx = 0;
-        const move = ev => {
-          vx = ev.clientX - lx; lx = ev.clientX;
-          s._x = Math.max(-30, Math.min(lab.clientWidth - s.offsetWidth + 30, ev.clientX - ox));
-          s._y = Math.max(-30, Math.min(lab.clientHeight - s.offsetHeight + 30, ev.clientY - oy));
-          s.style.transform = `translate(${s._x}px, ${s._y}px) rotate(${s._r + vx * .8}deg)`;
-        };
-        const up = () => {
-          s.classList.remove('is-drag');
-          s._r += vx * .8;
-          s.style.transform = `translate(${s._x}px, ${s._y}px) rotate(${s._r}deg)`;
-          s.removeEventListener('pointermove', move);
-          s.removeEventListener('pointerup', up);
-          s.removeEventListener('pointercancel', up);
-        };
-        s.addEventListener('pointermove', move);
-        s.addEventListener('pointerup', up);
-        s.addEventListener('pointercancel', up);
-      });
-    });
-    let rt;
-    addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(place, 200); });
+    $('[data-revolver]')?.addEventListener('click', place);
+    items.forEach(s => arrastre(s, { limite: (x, y) => [Math.max(-30, Math.min(lab.clientWidth - s.offsetWidth + 30, x)), Math.max(-30, Math.min(lab.clientHeight - s.offsetHeight + 30, y))] }));
+    let rt, w0 = innerWidth;
+    addEventListener('resize', () => { if (innerWidth === w0) return; w0 = innerWidth; clearTimeout(rt); rt = setTimeout(place, 200); });
   }
 
-  /* Líneas de progreso (proceso y roadmap) y barra de lectura -------------- */
-  const fills = $$('[data-progress]');
+  /* Barra de lectura ------------------------------------------------------- */
   const bar = $('.progress');
-  const tocLinks = $$('.toc a');
-  const chapters = tocLinks.map(a => $(a.getAttribute('href'))).filter(Boolean);
-  const onFrame = () => {
-    const vh = innerHeight;
-    fills.forEach(el => {
-      const r = el.parentElement.getBoundingClientRect();
-      const p = Math.max(0, Math.min(1, (vh * .62 - r.top) / r.height));
-      el.parentElement.style.setProperty('--p', p.toFixed(3));
-    });
-    if (bar) {
-      const h = document.documentElement.scrollHeight - vh;
+  if (bar) {
+    const set = () => {
+      const h = root.scrollHeight - innerHeight;
       bar.style.setProperty('--p', h > 0 ? (scrollY / h).toFixed(4) : 0);
-    }
-    if (chapters.length) {
-      let active = 0;
-      chapters.forEach((c, k) => { if (c.getBoundingClientRect().top < vh * .4) active = k; });
-      tocLinks.forEach((a, k) => a.classList.toggle('is-active', k === active));
-    }
-  };
-  addEventListener('scroll', () => requestAnimationFrame(onFrame), { passive: true });
-  onFrame();
+    };
+    addEventListener('scroll', () => requestAnimationFrame(set), { passive: true });
+    set();
+  }
+  $('.c-historia')?.addEventListener('toggle', () => { if (fx) ST.refresh(); });
 
   /* Capturas largas: duración del recorrido según su altura ---------------- */
   $$('.scrollshot').forEach(box => {
@@ -290,7 +340,7 @@
   if (lb) {
     const lbImg = $('img', lb);
     let opener;
-    const close = () => { lb.classList.remove('is-open'); document.body.style.overflow = ''; opener?.focus(); };
+    const close = () => { lb.classList.remove('is-open'); document.body.style.overflow = ''; lenis?.start(); opener?.focus(); };
     $$('[data-zoom]').forEach(el => el.addEventListener('click', () => {
       opener = el;
       lbImg.src = el.dataset.zoom;
@@ -298,6 +348,7 @@
       lbImg.className = el.dataset.fit !== undefined ? 'fit' : '';
       lb.classList.add('is-open');
       document.body.style.overflow = 'hidden';
+      lenis?.stop();
       $('.lightbox-close', lb).focus();
     }));
     lb.addEventListener('click', e => { if (e.target !== lbImg || lbImg.className === 'fit') close(); });
@@ -310,6 +361,20 @@
     btn.classList.add('is-copied');
     setTimeout(() => btn.classList.remove('is-copied'), 1800);
   }));
+
+  /* Cursor con etiqueta ----------------------------------------------------- */
+  const cursor = $('.cursor');
+  if (cursor && fine && fx) {
+    root.classList.add('cursor-activo');
+    const qx = G.quickTo(cursor, 'x', { duration: .25, ease: 'power3' }), qy = G.quickTo(cursor, 'y', { duration: .25, ease: 'power3' });
+    addEventListener('pointermove', e => { qx(e.clientX); qy(e.clientY); });
+    const txt = $('span', cursor);
+    document.addEventListener('pointerover', e => {
+      const t = e.target.closest?.('[data-cursor]');
+      cursor.classList.toggle('is-on', !!t);
+      if (t) txt.textContent = t.dataset.cursor;
+    });
+  }
 
   /* Año del pie */
   $$('[data-year]').forEach(el => { el.textContent = new Date().getFullYear(); });

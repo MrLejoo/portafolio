@@ -5,9 +5,8 @@
 const I = '/assets/img';
 
 export const perfil = {
-  nombre: 'Alejandro Hurtado',
-  marca: 'El Alquimista Digital',
-  rol: 'Diseñador UX/UI · Desarrollador web · Copywriter',
+  nombre: 'Alejandro Hurtado Martín',
+  rol: 'Diseñador UX/UI · Ilustración · Motion · Copywriting',
   ciudad: 'Caracas, Venezuela',
   email: 'contactoelalquimistadigital@gmail.com',
   whatsapp: '584241891975',
@@ -436,7 +435,7 @@ export const proyectos = [
     disciplinas: ['Producto digital', 'UX/UI', 'Diseño gráfico'],
     rol: 'Consultor, diseñador UX/UI y desarrollador',
     duracion: 'Propuesta de 6 semanas',
-    equipo: 'El Alquimista Digital',
+    equipo: 'Alejandro Hurtado Martín',
     herramientas: ['Figma', 'Supabase', 'Cloudflare Pages', 'Word / PDF'],
     portada: `${I}/bokditos/portada.webp`,
     destacado: false,
@@ -881,3 +880,65 @@ export const proyectos = [
     relacionados: ['tipografia', 'stickercom-ilustracion'],
   },
 ];
+
+// Color de cada proyecto (fondo y tinta): pinta su cartel en la portada y su página.
+// `capas` compone el cartel de los destacados: posición (x, y) y ancho (w) en % del escenario, giro (r),
+// velocidad de parallax (v). tipo: 'tel' (teléfono), 'pan' (captura con marco) o 'libre' (recorte sin fondo).
+export const estilo = {
+  'stickercom-tienda': { bg: '#FFD53D', ink: '#14110A', capas: [
+    { tipo: 'pan', src: `${I}/webs/stickercom-catalogo-desk.webp`, x: 4, y: 12, w: 74, r: -3, v: .5 },
+    { tipo: 'tel', src: `${I}/webs/stickercom-home-movil.webp`, x: 66, y: 30, w: 25, r: 6, v: 1.1 },
+    { tipo: 'libre', src: `${I}/stickers/disney/pelota-pixar.webp`, x: 0, y: 62, w: 20, r: -12, v: 1.6 },
+    { tipo: 'libre', src: `${I}/stickers/friends/friends-19.webp`, x: 40, y: 72, w: 22, r: 8, v: 1.3 },
+  ] },
+  diskpulse: { bg: '#1C0E14', ink: '#FF9A6B', capas: [
+    { tipo: 'pan', src: `${I}/diskpulse/mapa.webp`, x: 2, y: 16, w: 86, r: 2, v: .6 },
+    { tipo: 'libre', src: `${I}/diskpulse/icono.webp`, x: 74, y: 4, w: 24, r: -8, v: 1.5 },
+  ] },
+  caudal: { bg: '#0E3F86', ink: '#EAF4EC', capas: [
+    { tipo: 'pan', src: `${I}/caudal/resumen.webp`, x: 2, y: 8, w: 72, r: -2, v: .5 },
+    { tipo: 'pan', src: `${I}/caudal/resumen-oscuro.webp`, x: 28, y: 44, w: 68, r: 3, v: 1 },
+    { tipo: 'libre', src: `${I}/caudal/icono.webp`, x: 78, y: 4, w: 20, r: 9, v: 1.6 },
+  ] },
+  'mixing-kit': { bg: '#F5DE9E', ink: '#5B2A06', capas: [
+    { tipo: 'pan', src: `${I}/mixingkit/sunrise.webp`, x: 2, y: 10, w: 80, r: -2, v: .5 },
+    { tipo: 'tel', src: `${I}/mixingkit/movil-coctel.webp`, x: 72, y: 26, w: 25, r: 7, v: 1.2 },
+  ] },
+  wander: { bg: '#2E7FC4', ink: '#FFFFFF', capas: [
+    { tipo: 'tel', src: `${I}/wander/pantalla-bitacoras.webp`, x: 4, y: 20, w: 28, r: -8, v: .7 },
+    { tipo: 'tel', src: `${I}/wander/pantalla-explorar.webp`, x: 35, y: 6, w: 30, r: 0, v: 1.3 },
+    { tipo: 'tel', src: `${I}/wander/pantalla-perfil.webp`, x: 68, y: 22, w: 28, r: 8, v: .9 },
+  ] },
+  'velvet-spirit': { bg: '#170B07', ink: '#F4A65C', capas: [
+    { tipo: 'pan', src: `${I}/velvet/recetas-portada.webp`, x: 2, y: 12, w: 78, r: -2, v: .5 },
+    { tipo: 'tel', src: `${I}/velvet/recetas-movil-portada.webp`, x: 70, y: 28, w: 26, r: 6, v: 1.2 },
+  ] },
+  'stickercom-ilustracion': { bg: '#FF8CC6', ink: '#2A0B1C', capas: [
+    { tipo: 'libre', src: `${I}/stickers/disney/castillo-disney.webp`, x: 28, y: 6, w: 36, r: -4, v: .7 },
+    { tipo: 'libre', src: `${I}/stickers/disney/nemo.webp`, x: 0, y: 8, w: 28, r: -10, v: 1.4 },
+    { tipo: 'libre', src: `${I}/stickers/boho/boho-5.webp`, x: 68, y: 2, w: 28, r: 10, v: 1.2 },
+    { tipo: 'libre', src: `${I}/stickers/friends/friends-11.webp`, x: 2, y: 54, w: 28, r: 7, v: 1 },
+    { tipo: 'libre', src: `${I}/stickers/personalizadas/pizza-planet.webp`, x: 62, y: 56, w: 34, r: -7, v: 1.5 },
+    { tipo: 'libre', src: `${I}/stickers/tbbt/tbbt-10.webp`, x: 36, y: 62, w: 24, r: 12, v: 1.1 },
+  ] },
+  'stickercom-reel': { bg: '#1622E6', ink: '#FFFFFF', capas: [
+    { tipo: 'tel', src: `${I}/stickercom/reel-poster.webp`, x: 12, y: 8, w: 34, r: -6, v: .8 },
+    { tipo: 'tel', src: `${I}/stickercom/making-storyboard.webp`, x: 54, y: 16, w: 34, r: 6, v: 1.3 },
+  ] },
+  'reaccionar-vs-responder': { bg: '#E5211B', ink: '#FFFFFF', capas: [
+    { tipo: 'tel', src: `${I}/reaccionar/alerta.webp`, x: 3, y: 18, w: 29, r: -7, v: .7 },
+    { tipo: 'tel', src: `${I}/reaccionar/emocion.webp`, x: 35, y: 4, w: 31, r: 1, v: 1.3 },
+    { tipo: 'tel', src: `${I}/reaccionar/responde.webp`, x: 69, y: 20, w: 29, r: 7, v: .9 },
+  ] },
+  airbijagos: { bg: '#0F6E6A', ink: '#F4F7E8' },
+  loremcraft: { bg: '#6C63FF', ink: '#FFFFFF' },
+  bokditos: { bg: '#FF9A3D', ink: '#2A1204' },
+  wadirecto: { bg: '#0B3D2A', ink: '#7CF2B0' },
+  'roi-express': { bg: '#D9E6FF', ink: '#0A2470' },
+  'beacon-212': { bg: '#111014', ink: '#FFD53D' },
+  'campanas-en': { bg: '#F5F0E6', ink: '#E5211B' },
+  maigourmet: { bg: '#FFFFFF', ink: '#111014' },
+  tipografia: { bg: '#74C886', ink: '#10240F' },
+  interfaces: { bg: '#BFEFF0', ink: '#0B3236' },
+  fotografia: { bg: '#7E1022', ink: '#FFE9D6' },
+};

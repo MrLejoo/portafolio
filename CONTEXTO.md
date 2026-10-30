@@ -1,15 +1,18 @@
-# Portafolio · El Alquimista Digital · Contexto del proyecto
+# Portafolio · Alejandro Hurtado Martín · Contexto del proyecto
 
-> Última actualización: **07/10/2026**. Si trabajas en este proyecto en un chat nuevo, **lee este archivo antes de empezar**. Responde siempre en español.
+> Última actualización: **30/10/2026**. Si trabajas en este proyecto en un chat nuevo, **lee este archivo antes de empezar**. Responde siempre en español.
 
 ## 1. Qué es
 
-Portafolio de **Alejandro Hurtado** («El Alquimista Digital»): diseño UX/UI, desarrollo web, copywriting, ilustración, motion y fotografía. Cada proyecto tiene su página de caso de estudio con **intención, reto, roadmap paso a paso, decisiones, galería, cifras y aprendizaje**.
+Portafolio de **Alejandro Hurtado Martín**: diseño UX/UI, ilustración, motion, copywriting, fotografía y desarrollo web. Se presenta como diseñador, no como programador: mucho trabajo visible y poco texto. Cada proyecto tiene su página, con el texto largo (intención, reto, roadmap, decisiones) recogido en el desplegable «La historia completa».
 
-- Estética: oscura, de «sitio para desarrolladores» (referencia: Appwrite en Refero), retícula de fondo, etiquetas monoespaciadas, cursor `_` parpadeante.
-- Paleta (Coolors): `#0D1B2A` fondo · `#1B263B` superficies · `#415A77` líneas/acento · `#778DA9` texto secundario · `#E0E1DD` y **blanco** para el texto.
-- Tipografías: Space Grotesk (títulos), Inter (texto), JetBrains Mono (etiquetas).
-- **Capa «Editorial»** (14/10/2026, a partir del sistema de diseño Steep, `DESIGN (1).md` del usuario; sustituye a una capa «Blueprint» de Buddy que se revirtió): H1/H2 en **Instrument Serif 400** (sustituto libre de Signifier, `src/assets/fonts`) con **una frase en `<em>` cursiva** por titular; artefactos blancos flotantes con sombra suave alrededor de la terminal del héroe (tarjeta de cifra con línea siena, cursor «AH» y compositor «Cuéntame qué quieres construir…» que lleva a contacto); tarjetas planas sin borde con la imagen encajada a 16 px; marquesina en serif cursiva; pliego claro en medio de la noche: Proceso en blanco niebla (`.section--fog`) y Sobre mí en blanco papel (`.section--paper`) con la **única** tarjeta melocotón `#FBE1D1` y texto siena `#5D2A1A`. Botones: la pareja píldora blanca + contorno (la versión oscura de los de Steep). Reglas: la serif nunca en negrita; el melocotón solo una vez por página y sobre blanco.
+- **Concepto «Mesa de diseño»** (30/10/2026, skill epic-design; sustituye a la estética oscura de terminal y a la capa Editorial): póster tipográfico enorme con el nombre, stickers que se despegan, color plano a sangre y anotaciones a mano.
+- **Recorrido de la portada:** póster con el nombre → se entra por la O de HURTADO al muro de piezas → carteles de los destacados (scroll horizontal en escritorio, pila de cartas en móvil) → Archivo con filtros → foto a sangre → Mesa de juego (tapete de corte con stickers arrastrables) → Proceso en cartas → Sobre mí → Hablemos.
+- **Paleta:** ultramar `#2430F0`, tomate `#FF4A1F`, limón `#FFD53D`, rosa `#FF8CC6`, lila `#B8A6FF`, tapete `#0E7A5A`, papel `#F5F0E6`, tinta `#111014`. Cada proyecto tiene su color en `estilo` (al final de `proyectos.mjs`).
+- **Tipografías:** Bricolage Grotesque (titulares, condensada al 75 %), Instrument Serif cursiva (acentos), Reenie Beanie (notas a mano), Inter (texto largo). Todas servidas desde el sitio.
+- **Movimiento:** GSAP, ScrollTrigger y Lenis en `src/js/vendor/` (autoalojados, unidos al JS en el build; nunca CDN, por la CSP). Sin JS o con `prefers-reduced-motion` no se añade `html.fx` y la página queda apilada y estática.
+- **Para añadir un destacado:** poner `destacado: true` y añadir en `estilo` su color y sus `capas` (teléfonos, capturas o recortes con posición, giro y velocidad).
+- **Prueba de escritorio y móvil con animación:** el navegador integrado de Claude tiene activado «reducir movimiento» y solo muestra la versión estática; hay que probar con Playwright + Edge (`reducedMotion: 'no-preference'`).
 
 ## 2. Estructura
 
@@ -17,7 +20,8 @@ Portafolio de **Alejandro Hurtado** («El Alquimista Digital»): diseño UX/UI, 
 src/data/proyectos.mjs   ← TODO el contenido (perfil + proyectos). Editar aquí.
 src/css/estilos.css      ← sistema visual (tokens en :root)
 src/css/fuentes.css      ← @font-face de las fuentes propias (src/assets/fonts)
-src/js/main.js           ← animaciones e interacciones (sin dependencias)
+src/js/main.js           ← escenas de scroll e interacciones (GSAP)
+src/js/vendor/           ← GSAP, ScrollTrigger y Lenis autoalojados
 src/assets/img|video     ← imágenes WebP y videos ya optimizados (sí van a git)
 src/static/              ← favicon, _headers (se copian tal cual)
 scripts/build.mjs        ← genera dist/: portada, /proyectos/<slug>/, 404, sitemap, robots, llms.txt

@@ -4,7 +4,7 @@ import { readFileSync, writeFileSync, mkdirSync, rmSync, cpSync, existsSync, rea
 import { createHash } from 'node:crypto';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { perfil, disciplinas, proyectos } from '../src/data/proyectos.mjs';
+import { perfil, disciplinas, proyectos, estilo } from '../src/data/proyectos.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SRC = join(ROOT, 'src');
@@ -55,14 +55,16 @@ function img(src, { alt = '', lazy = true, priority = false, extra = '' } = {}) 
 
 /* Iconos ---------------------------------------------------------------- */
 const ico = {
-  arrow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+  arrow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
   play: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>',
-  close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>',
-  logo: '<svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x=".5" y=".5" width="31" height="31" rx="9" fill="#1B263B" stroke="#415A77"/><path d="M13 7h6M14 7v6.2l-5.3 9.2A2.4 2.4 0 0 0 10.8 26h10.4a2.4 2.4 0 0 0 2.1-3.6L18 13.2V7" stroke="#E0E1DD" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M11.4 20h9.2" stroke="#778DA9" stroke-width="1.6" stroke-linecap="round"/><circle cx="15" cy="22.6" r="1" fill="#fff"/><circle cx="18" cy="23.3" r=".7" fill="#A7B7CC"/></svg>',
+  close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+  flecha: '<svg class="garabato" viewBox="0 0 120 70" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path pathLength="1" d="M4 12c22 34 58 44 104 30M92 26l17 16-21 12"/></svg>',
 };
 
+const siglas = perfil.nombre.split(' ').map(w => w[0]).join('');
+
 /* Plantilla común ------------------------------------------------------- */
-function layout({ title, description, path, image, body, bodyClass = '' }) {
+function layout({ title, description, path, image, body, bodyClass = '', bg = '#2430F0' }) {
   const url = SITE + path;
   const og = SITE + asset(image || '/assets/img/og.jpg');
   return `<!doctype html>
@@ -72,8 +74,9 @@ function layout({ title, description, path, image, body, bodyClass = '' }) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(description)}">
+<meta name="author" content="${esc(perfil.nombre)}">
 <link rel="canonical" href="${url}">
-<meta name="theme-color" content="#0D1B2A">
+<meta name="theme-color" content="${bg}">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="es_VE">
 <meta property="og:title" content="${esc(title)}">
@@ -86,13 +89,13 @@ ${PRELOAD_FONTS}
 <link rel="stylesheet" href="${CSS_URL}">
 </head>
 <body class="${bodyClass}">
-<a class="skip" href="#contenido">Saltar al contenido</a>
-<div class="bg-grid" aria-hidden="true"></div><div class="bg-glow" aria-hidden="true"></div><div class="bg-noise" aria-hidden="true"></div>
+<a class="skip-link" href="#contenido">Saltar al contenido</a>
 ${header(path)}
 <main id="contenido">
 ${body}
 </main>
 ${footer()}
+<div class="cursor" aria-hidden="true"><span></span></div>
 <script src="${JS_URL}" defer></script>
 </body>
 </html>`;
@@ -102,53 +105,37 @@ function header(path) {
   const home = path === '/';
   const l = h => (home ? h : '/' + h);
   return `<header class="header">
-  <div class="wrap">
-    <a class="logo" href="/" aria-label="Inicio · El Alquimista Digital">${ico.logo}<span>alquimista<em>.digital</em></span></a>
-    <span class="status"><i></i>Disponible para proyectos</span>
-    <button class="menu-btn" aria-label="Abrir menú" aria-expanded="false" aria-controls="nav"><span></span></button>
-    <nav class="nav" id="nav" aria-label="Principal">
-      <a href="${l('#proyectos')}">Proyectos</a>
-      <a href="${l('#proceso')}">Proceso</a>
-      <a href="${l('#sobre-mi')}">Sobre mí</a>
-      <a class="btn" href="${l('#contacto')}">Hablemos ${ico.arrow}</a>
-    </nav>
-  </div>
+  <a class="logo" href="/" aria-label="Inicio · ${esc(perfil.nombre)}">${siglas}</a>
+  <button class="menu-btn" aria-label="Abrir menú" aria-expanded="false" aria-controls="nav"><span>Menú</span></button>
+  <nav class="nav" id="nav" aria-label="Principal">
+    <a href="${l('#trabajo')}">Trabajo</a>
+    <a href="${l('#archivo')}">Archivo</a>
+    <a href="${l('#mesa')}">Mesa</a>
+    <a href="${l('#sobre-mi')}">Yo</a>
+    <a href="${l('#contacto')}">Hablemos</a>
+  </nav>
 </header>`;
 }
 
 function footer() {
   return `<footer class="footer">
-  <div class="wrap">
-    <span>© <span data-year>2026</span> ${esc(perfil.nombre)} · ${esc(perfil.marca)}</span>
-    <nav aria-label="Contacto">
-      <a href="mailto:${perfil.email}">Correo</a>
-      <a href="https://wa.me/${perfil.whatsapp}" target="_blank" rel="noopener">WhatsApp</a>
-      <a href="${perfil.figma}" target="_blank" rel="noopener">Figma</a>
-    </nav>
-    <span>Hecho a mano en ${esc(perfil.ciudad)}</span>
-  </div>
+  <span>© <span data-year>2026</span> ${esc(perfil.nombre)}</span>
+  <nav aria-label="Contacto">
+    <a href="mailto:${perfil.email}">Correo</a>
+    <a href="https://wa.me/${perfil.whatsapp}" target="_blank" rel="noopener">WhatsApp</a>
+    <a href="${perfil.figma}" target="_blank" rel="noopener">Figma</a>
+  </nav>
+  <span>Hecho a mano en ${esc(perfil.ciudad)}</span>
 </footer>`;
 }
 
 /* Piezas ---------------------------------------------------------------- */
 const coverOf = p => p.portada || null;
+const tono = p => estilo[p.slug] || { bg: '#F5F0E6', ink: '#111014' };
 
 function typeCover(p) {
   const m = p.metricas?.[0];
-  return `<div class="cover-type"><small>${esc(p.disciplinas.join(' · '))}</small><b>${esc(m ? m.v : p.titulo)}</b><small>${esc(m ? m.l : p.subtitulo)}</small></div>`;
-}
-
-function card(p, size, i) {
-  const c = coverOf(p);
-  return `<a class="card card--${size} reveal" style="--d:${(i % 3) * 0.08}s" href="/proyectos/${p.slug}/">
-    <div class="card-media">${c ? img(c, {}) : typeCover(p)}</div>
-    <span class="card-arrow">${ico.arrow}</span>
-    <div class="card-body">
-      <div class="card-top"><span>${esc(p.disciplinas.slice(0, 2).join(' · '))}</span><span>${esc(p.anio)}</span></div>
-      <h3>${esc(p.titulo)}</h3>
-      <p>${esc(p.resumen)}</p>
-    </div>
-  </a>`;
+  return `<div class="cover-type"><b>${esc(m ? m.v : p.titulo)}</b><small>${esc(m ? m.l : p.subtitulo)}</small></div>`;
 }
 
 function stickersList(limit) {
@@ -158,171 +145,168 @@ function stickersList(limit) {
   return all.filter((_, i) => i % step === 0).slice(0, limit);
 }
 
+// Título enorme letra a letra; la O de HURTADO es la puerta al muro de trabajos.
+const letras = (t, puerta) => [...t].map((c, i) => `<span class="l${puerta && i === t.length - 1 ? ' o' : ''}">${c}</span>`).join('');
+
+function capa(c) {
+  const pos = `style="--x:${c.x};--y:${c.y};--w:${c.w};--r:${c.r}deg" data-v="${c.v}"`;
+  if (c.tipo === 'tel') return `<div class="capa capa--tel" ${pos}><div class="phone"><div class="phone-screen">${img(c.src)}</div></div></div>`;
+  if (c.tipo === 'pan') return `<div class="capa capa--pan" ${pos}>${img(c.src)}</div>`;
+  return `<div class="capa capa--libre" ${pos}>${img(c.src)}</div>`;
+}
+
+function cartel(p, i) {
+  const t = tono(p), nombre = p.titulo.replace('StickerCom · ', '');
+  return `<a class="cartel" href="/proyectos/${p.slug}/" style="--bg:${t.bg};--ink:${t.ink};--n:${nombre.length}" data-cursor="Ver">
+    <span class="cartel-n">${pad(i + 1)}</span>
+    <div class="cartel-escena" aria-hidden="true">${(t.capas || []).map(capa).join('')}</div>
+    <div class="cartel-pie">
+      <small>${esc(p.disciplinas.slice(0, 2).join(' · '))}</small>
+      <h3>${esc(nombre)}</h3>
+    </div>
+  </a>`;
+}
+
 /* Portada --------------------------------------------------------------- */
 function home() {
   const destacados = proyectos.filter(p => p.destacado);
   const counts = Object.fromEntries(disciplinas.map(d => [d, proyectos.filter(p => p.disciplinas.includes(d)).length]));
-  const marquee = ['Investigación UX', 'Diseño de interfaces', 'Prototipado en Figma', 'Desarrollo web', 'Supabase', 'Cloudflare', 'Copywriting', 'Ilustración', 'Motion', 'SEO técnico', 'Fotografía', 'Estrategia de marketing'];
-  const stickers = stickersList(22);
+  const S = '/assets/img/stickers', P = '/assets/img/posts';
+  const stickers = stickersList(24);
+  const pegados = [
+    [`${S}/disney/pelota-pixar.webp`, 71, 4, 12, -14],
+    [`${S}/friends/friends-19.webp`, 56, 10, 15, 9],
+    [`${S}/boho/boho-5.webp`, 2, 37, 11, -9],
+    [`${S}/disney/nemo.webp`, 28, 40, 13, 7],
+    [`${S}/personalizadas/pizza-planet.webp`, 60, 69, 15, -6],
+    [`${S}/f1/box.webp`, 38, 2, 8, 11],
+    [`${S}/tbbt/tbbt-10.webp`, 82, 66, 10, 14],
+    [`${S}/personalizadas/nike.webp`, 40, 68, 12, -11],
+    [`${S}/travel/travel-13.webp`, 4, 8, 11, 12],
+  ];
+  const muro = [
+    [`${P}/disney/post-1.webp`, `${P}/f1/69.webp`, `${P}/harry-potter/79.webp`, `${P}/disney/post-21.webp`],
+    [`${P}/boho/101.webp`, `${P}/disney/post-17.webp`, `${P}/friends/friends-13.webp`, `${P}/travel/105.webp`],
+    [`${P}/disney/post-23.webp`, `${P}/the-big-bang-theory/88.webp`, `${P}/f1/65.webp`, `${P}/disney/post-29.webp`],
+    [`${P}/travel/109.webp`, `${P}/boho/103.webp`, `${P}/travel/103.webp`, `${P}/boho/102.webp`],
+  ];
+  const pasos = [
+    ['Escuchar', 'Busco el problema verdadero, no el que aparece en el brief.', '#FFD53D', '#14110A', `${S}/friends/friends-17.webp`],
+    ['Definir', 'Si no se puede medir, todavía no está definido.', '#FF4A1F', '#14110A', `${S}/tbbt/tbbt-10.webp`],
+    ['Dibujar', 'Iterar en diseño cuesta horas; en código, semanas.', '#FF8CC6', '#2A0B1C', `${S}/boho/boho-3.webp`],
+    ['Escribir', 'El texto decide si un botón se pulsa.', '#B8A6FF', '#14103A', `${S}/friends/friends-22.webp`],
+    ['Construir', 'Del prototipo a producción, sin soltar el detalle.', '#0E7A5A', '#F5F0E6', `${S}/disney/castillo-disney.webp`],
+    ['Medir', 'Cada versión es la hipótesis de la siguiente.', '#2430F0', '#FFFFFF', `${S}/f1/week.webp`],
+  ];
 
   const body = `
-<section class="hero">
-  <div class="wrap">
-    <div>
-      <span class="kicker reveal">Portafolio · ${esc(perfil.ciudad)}</span>
-      <h1 data-split>Diseño, escribo y construyo productos <span class="soft"><em>que la gente entiende</em></span><span class="cursor"></span></h1>
-      <p class="hero-lead reveal" style="--d:.35s">Soy <strong>${esc(perfil.nombre)}</strong>: diseñador UX/UI, desarrollador web y copywriter. Del primer minuto de investigación al código en producción, con una idea fija: que cada pantalla tenga una razón de existir.</p>
-      <div class="hero-cta reveal" style="--d:.5s">
-        <a class="btn" href="#proyectos">Ver proyectos ${ico.arrow}</a>
-        <a class="btn btn--ghost" href="#contacto">Escríbeme</a>
-      </div>
-      <div class="hero-stats reveal" style="--d:.65s">
-        <div><b data-count>${proyectos.length}</b><span>proyectos</span></div>
-        <div><b data-count>${disciplinas.length}</b><span>disciplinas</span></div>
-        <div><b data-count>200+</b><span>ilustraciones</span></div>
-        <div><b>1</b><span>tienda en producción</span></div>
-      </div>
+<section class="hero scene" data-scene="hero" aria-label="Portada">
+  <div class="layer depth-0 trama" data-depth="0" aria-hidden="true"></div>
+
+  <div class="portal" data-depth="3">
+    <div class="muro" aria-hidden="true">${muro.map((col, i) => `<div class="muro-col">${col.map(s => img(s, { lazy: false })).join('')}</div>`).join('')}</div>
+    <div class="portal-velo" aria-hidden="true"></div>
+    <p class="portal-frase"><span>Dibujo, compongo, animo.</span> <em>Y si hace falta, también lo construyo.</em></p>
+  </div>
+
+  <h1 class="nombre layer depth-4" data-depth="4" aria-label="${esc(perfil.nombre)}">
+    <span class="fila fila--1" aria-hidden="true">${letras('ALEJANDRO')}</span>
+    <span class="fila fila--2" aria-hidden="true">${letras('HURTADO', true)}</span>
+    <span class="fila fila--3" aria-hidden="true">${letras('MARTÍN')}</span>
+  </h1>
+
+  <div class="pegados layer depth-5" data-depth="5" aria-hidden="true">
+    ${pegados.map(([s, x, y, w, r]) => `<div class="pegado" data-cursor="Despega" style="--x:${x};--y:${y};--w:${w};--r:${r}deg">${img(s, { lazy: false, extra: ' draggable="false"' })}</div>`).join('')}
+  </div>
+
+  <p class="hero-nota"><span>despega los stickers</span>${ico.flecha}</p>
+  <p class="hero-rol">${esc(perfil.rol)}</p>
+</section>
+
+<section class="trabajo" id="trabajo" aria-label="Trabajo seleccionado">
+  <div class="carril">
+    <div class="carril-intro">
+      <h2 data-lines>Trabajo <em>seleccionado</em></h2>
+      <p class="mano">sigue bajando ↓ se mueve de lado</p>
     </div>
-    <div class="hero-art reveal" style="--d:.25s">
-    <div class="artifact art-stat" aria-hidden="true">
-      <small>Proyectos publicados</small>
-      <b>${proyectos.length}</b>
-      <i>en ${disciplinas.length} disciplinas · desde 2023</i>
-      <svg viewBox="0 0 180 34" fill="none"><path d="M2 30 C 24 28, 30 22, 46 23 S 70 12, 88 15 S 112 20, 126 10 S 158 6, 178 3" stroke="#5D2A1A" stroke-width="1.8" stroke-linecap="round"/><circle cx="178" cy="3" r="2.6" fill="#5D2A1A"/></svg>
-    </div>
-    <div class="artifact art-cursor" aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 2.5 20 11l-7 1.6L9.6 20z"/></svg>
-      <span class="av">AH</span><span>Alejandro está diseñando</span>
-    </div>
-    <div class="terminal" aria-label="Perfil en formato de código">
-      <div class="terminal-bar"><i></i><i></i><i></i><span>~/alquimista — perfil.json</span></div>
-<pre data-type><span class="t-prompt">$</span> cat perfil.json
-{
-  <span class="t-key">"nombre"</span>: <span class="t-str">"${esc(perfil.nombre)}"</span>,
-  <span class="t-key">"alias"</span>: <span class="t-str">"${esc(perfil.marca)}"</span>,
-  <span class="t-key">"hago"</span>: [
-    <span class="t-str">"investigación UX"</span>,
-    <span class="t-str">"interfaces en Figma"</span>,
-    <span class="t-str">"webs que se publican solas"</span>,
-    <span class="t-str">"textos que venden"</span>
-  ],
-  <span class="t-key">"stack"</span>: [<span class="t-str">"Figma"</span>, <span class="t-str">"JS"</span>, <span class="t-str">"Python"</span>, <span class="t-str">"Supabase"</span>],
-  <span class="t-key">"idiomas"</span>: [<span class="t-str">"español"</span>, <span class="t-str">"inglés"</span>],
-  <span class="t-key">"disponible"</span>: <span class="t-str">true</span>
-}
-<span class="t-com">// convierto ideas sueltas en productos que funcionan</span></pre>
-    </div>
-    <a class="art-ask" href="#contacto"><em>Cuéntame qué quieres construir…</em><b aria-hidden="true">${ico.arrow}</b><span class="sr">Ir a contacto</span></a>
-    </div>
+    ${destacados.map(cartel).join('')}
   </div>
 </section>
 
-<div class="marquee" aria-hidden="true"><div class="marquee-track">${[...marquee, ...marquee].map(m => `<span>${m}</span>`).join('')}</div></div>
-
-<section class="section" id="proyectos">
-  <div class="wrap">
-    <div class="section-head">
-      <span class="kicker">01 — Trabajo seleccionado</span>
-      <h2 data-split>Proyectos que cuentan <em>cómo pienso</em></h2>
-      <p class="reveal">Cada caso explica la intención, el reto y el camino completo, paso a paso, desde la primera pregunta hasta el resultado.</p>
-    </div>
-    <div class="bento">${destacados.map((p, i) => card(p, destacados.length % 2 && i === destacados.length - 1 ? 'full' : i % 4 === 0 || i % 4 === 3 ? 'xl' : 'l', i)).join('')}</div>
-  </div>
-</section>
-
-<section class="section" id="indice" style="padding-top:0">
-  <div class="wrap">
-    <div class="section-head section-head--row">
-      <div style="display:grid;gap:18px"><span class="kicker">02 — Índice completo</span><h2 data-split>Todo el <em>archivo</em></h2></div>
-      <div class="filters" role="group" aria-label="Filtrar por disciplina">
-        <button class="chip" data-filter="*" aria-pressed="true">Todo<sup>${proyectos.length}</sup></button>
-        ${disciplinas.map(d => `<button class="chip" data-filter="${esc(d)}" aria-pressed="false">${esc(d)}<sup>${counts[d]}</sup></button>`).join('')}
-      </div>
+<section class="archivo scene" id="archivo" aria-label="Archivo">
+  <div class="layer depth-0 trama trama--tinta" data-depth="0" aria-hidden="true"></div>
+  <div class="layer depth-4" data-depth="4">
+    <h2 class="gigante" data-lines>Archivo</h2>
+    <div class="filtros" role="group" aria-label="Filtrar por disciplina">
+      <button class="chip" data-filter="*" aria-pressed="true">Todo<sup>${proyectos.length}</sup></button>
+      ${disciplinas.map(d => `<button class="chip" data-filter="${esc(d)}" aria-pressed="false">${esc(d)}<sup>${counts[d]}</sup></button>`).join('')}
     </div>
     <p class="sr" id="index-live" aria-live="polite"></p>
-    <ul class="index">
-      ${proyectos.map((p, i) => `<li data-tags="${esc(p.disciplinas.join('|'))}"><a href="/proyectos/${p.slug}/" data-img="${coverOf(p) ? asset(coverOf(p)) : ''}">
-        <span class="n">${pad(i + 1)}</span><span class="t">${esc(p.titulo)}</span><span class="d">${esc(p.disciplinas.join(' · '))}</span><span class="y">${esc(p.anio)}</span>${ico.arrow}
-      </a></li>`).join('')}
+    <ul class="indice">
+      ${proyectos.map(p => { const t = tono(p); return `<li data-tags="${esc(p.disciplinas.join('|'))}" style="--bg:${t.bg};--ink:${t.ink}"><a href="/proyectos/${p.slug}/" data-img="${coverOf(p) ? asset(coverOf(p)) : ''}" data-cursor="Ver">
+        <span class="t">${esc(p.titulo)}</span><span class="d">${esc(p.disciplinas[0])}</span><span class="y">${esc(p.anio.slice(-4))}</span>
+      </a></li>`; }).join('')}
     </ul>
   </div>
   <div class="preview" aria-hidden="true"><img alt=""></div>
 </section>
 
-<section class="section" id="laboratorio" style="padding-top:0">
-  <div class="wrap">
-    <div class="section-head">
-      <span class="kicker">03 — Laboratorio</span>
-      <h2 data-split>Un poco de <em>juego</em></h2>
-      <p class="reveal">Algunas de las más de 200 ilustraciones que dibujé para StickerCom. Arrástralas, ordénalas o haz un desastre.</p>
+<section class="mirada scene" aria-label="Fotografía">
+  <div class="mirada-foto layer depth-3" data-depth="3">${img('/assets/img/foto/dsc00037.webp', { alt: 'Mazorca de cacao roja sobre una rama' })}</div>
+  <a class="mirada-texto layer depth-4" data-depth="4" href="/proyectos/fotografia/" data-cursor="Ver"><span>También</span> <em>miro</em></a>
+</section>
+
+<section class="mesa scene" id="mesa" aria-label="Mesa de juego con ilustraciones">
+  <div class="layer depth-0 tapete" data-depth="0" aria-hidden="true"></div>
+  <div class="mesa-rotulo layer depth-4" data-depth="4">
+    <h2 data-lines>Mesa <em>de juego</em></h2>
+    <p class="mano">más de 200 stickers dibujados por mí. haz un desastre.</p>
+    <button class="boton boton--mini" data-revolver>Revolver</button>
+  </div>
+  <div class="lab">${stickers.map(s => `<div class="sticker" data-cursor="Arrastra">${img(s, { extra: ' draggable="false"' })}</div>`).join('')}</div>
+</section>
+
+<section class="pasos" id="proceso" aria-label="Cómo trabajo">
+  ${pasos.map(([t, d, bg, ink, s], i) => `<article class="paso scene" style="--bg:${bg};--ink:${ink};--i:${i}">
+    <div class="layer depth-3 paso-sticker" data-depth="3" aria-hidden="true">${img(s)}</div>
+    <div class="layer depth-4 paso-texto" data-depth="4">
+      <span class="paso-n">${i + 1}/${pasos.length}</span>
+      <h3>${t}</h3>
+      <p>${d}</p>
     </div>
-    <div class="lab reveal">
-      <div class="lab-hint"><b>arrástrame</b><span>Ilustraciones de StickerCom</span></div>
-      ${stickers.map(s => `<div class="sticker">${img(s, { extra: ' draggable="false"' })}</div>`).join('')}
+  </article>`).join('')}
+</section>
+
+<section class="yo scene" id="sobre-mi" aria-label="Sobre mí">
+  <div class="layer depth-4" data-depth="4">
+    <p class="yo-frase" data-luz>Vengo del marketing, me formé en UX/UI y dibujo stickers. Mezclo disciplinas que casi siempre viven separadas, y las junto hasta que algo se pueda tocar.</p>
+    <div class="sellos" aria-label="En cifras">
+      <div class="sello sello--a"><b data-count>${proyectos.length}</b><span>proyectos</span></div>
+      <div class="sello sello--b"><b data-count>200+</b><span>ilustraciones</span></div>
+      <div class="sello sello--c"><b data-count>${disciplinas.length}</b><span>disciplinas</span></div>
     </div>
+    <ul class="oficios">${['UX/UI', 'Ilustración', 'Motion', 'Copywriting', 'Fotografía', 'Desarrollo web'].map(o => `<li>${o}</li>`).join('')}</ul>
   </div>
 </section>
 
-<section class="section section--fog" id="proceso">
-  <div class="wrap">
-    <div class="section-head">
-      <span class="kicker">04 — Proceso</span>
-      <h2 data-split>Cómo trabajo, <em>en commits</em></h2>
-      <p class="reveal">No hay dos proyectos iguales, pero casi todos pasan por estas etapas. A veces en seis meses, a veces en una noche.</p>
-    </div>
-    <div class="log">
-      <span class="log-fill" data-progress></span>
-      ${[
-        ['a1f3e9c', 'descubrir', 'Escuchar antes de dibujar', 'Entrevistas, encuestas, analítica y conversaciones reales con el negocio. Busco el problema verdadero, no el que aparece en el brief.'],
-        ['b72d014', 'definir', 'Poner el problema en una frase', 'Affinity mapping, arquetipos y métricas de éxito. Si no se puede medir, todavía no está definido.'],
-        ['c09e5aa', 'diseñar', 'Probar ideas baratas', 'Wireframes, sistema de diseño y prototipos en Figma. Iterar en diseño cuesta horas; en código, semanas.'],
-        ['d4b8c71', 'escribir', 'Las palabras también son interfaz', 'Microcopy, mensajes de error, titulares y llamadas a la acción. El texto decide si un botón se pulsa.'],
-        ['e61f2d3', 'construir', 'Del prototipo a producción', 'HTML, CSS y JavaScript ligeros, bases de datos con reglas de seguridad y publicación automática en cada cambio.'],
-        ['f3a7b90', 'medir', 'Aprender y volver a empezar', 'Analítica, mapas de calor y lo que dicen los clientes. Cada versión es la hipótesis de la siguiente.'],
-      ].map(([h, f, t, d]) => `<div class="log-item"><span class="log-dot"></span><div class="reveal"><div class="log-meta"><span class="hash">${h}</span><span>feat(${f})</span></div><h3>${t}</h3><p>${d}</p></div></div>`).join('')}
-    </div>
-  </div>
-</section>
-
-<section class="section section--paper" id="sobre-mi">
-  <div class="wrap about">
-    <div>
-      <span class="kicker">05 — Sobre mí</span>
-      <div class="about-text" style="margin-top:22px">
-        <figure class="about-quote reveal" style="margin:26px 0 0"><p>Me llaman El Alquimista Digital porque me gusta <em>mezclar</em> disciplinas que casi siempre viven separadas.</p><small>— ${esc(perfil.nombre)}</small></figure>
-        <p class="reveal">Vengo del marketing: lideré el departamento de marketing de Beacon 212, donde aprendí que una buena idea sin números no convence a nadie. Me formé como diseñador UX/UI y en la universidad llevé Wander, una app de viajes, desde la investigación hasta el prototipo final.</p>
-        <p class="reveal">Hoy diseño y construyo productos completos. StickerCom empezó como ilustraciones en una mesa y terminó siendo una tienda online con pagos, base de datos y publicación automática. Trabajo con la IA como copiloto para llegar más lejos y más rápido, sin delegarle las decisiones.</p>
-      </div>
-    </div>
-    <div class="skills">
-      ${[
-        ['UX/UI', 'Figma · Maze · Hotjar', 'Investigación, arquitectura de información, prototipos de alta fidelidad y sistemas de diseño.'],
-        ['Desarrollo', 'JS · Python · Supabase', 'Webs rápidas y accesibles, tiendas con pagos, paneles de administración, SEO técnico y apps de escritorio para Windows.'],
-        ['Copywriting', 'ES · EN', 'Landings, anuncios de respuesta directa, correos en frío, guiones y microcopy de producto.'],
-        ['Diseño gráfico', 'Illustrator · Photoshop', 'Ilustración, piezas para redes, gran formato y archivos listos para imprenta.'],
-        ['Motion y foto', 'Video · Cámara', 'Reels de producto, making of y fotografía que entrena el ojo para componer.'],
-      ].map(([t, s, d], i) => `<div class="skill reveal" style="--d:${i * .06}s"><h3>${t}<span>${s}</span></h3><p>${d}</p></div>`).join('')}
-    </div>
-  </div>
-</section>
-
-<section class="contact" id="contacto">
-  <div class="wrap">
-    <span class="kicker reveal">06 — Contacto</span>
-    <h2 data-split>¿Tienes una idea? Hagámosla <em>real</em><span class="cursor"></span></h2>
-    <p class="reveal">Cuéntame qué quieres construir. Respondo personalmente, normalmente en menos de 24 horas.</p>
-    <div class="contact-actions reveal">
-      <a class="btn" href="https://wa.me/${perfil.whatsapp}?text=${encodeURIComponent('Hola Alejandro, vi tu portafolio y quiero contarte un proyecto.')}" target="_blank" rel="noopener">Escribir por WhatsApp ${ico.arrow}</a>
-      <button class="btn btn--ghost copy-mail" data-mail="${perfil.email}"><span class="toast" role="status">¡Correo copiado!</span>Copiar mi correo</button>
+<section class="contacto scene" id="contacto" aria-label="Contacto">
+  <div class="layer depth-0 trama" data-depth="0" aria-hidden="true"></div>
+  <div class="layer depth-4" data-depth="4">
+    <h2 class="hablemos" aria-label="Hablemos"><span aria-hidden="true">${letras('Hablemos')}</span></h2>
+    <p class="mano">cuéntame qué quieres hacer</p>
+    <div class="contacto-botones">
+      <a class="boton" href="https://wa.me/${perfil.whatsapp}?text=${encodeURIComponent('Hola Alejandro, vi tu portafolio y quiero contarte un proyecto.')}" target="_blank" rel="noopener" data-cursor="Va">WhatsApp ${ico.arrow}</a>
+      <button class="boton boton--linea copy-mail" data-mail="${perfil.email}"><span class="toast" role="status">¡Correo copiado!</span>Copiar correo</button>
     </div>
   </div>
 </section>`;
 
   return layout({
-    title: `${perfil.nombre} · Diseñador UX/UI, desarrollador y copywriter`,
-    description: `Portafolio de ${perfil.nombre} (${perfil.marca}): casos de UX/UI, desarrollo web, copywriting, ilustración, motion y fotografía, con la intención y el roadmap de cada proyecto.`,
+    title: `${perfil.nombre} · Diseñador`,
+    description: `Portafolio de ${perfil.nombre}: interfaces, ilustración, motion, copywriting y fotografía.`,
     path: '/',
     body,
+    bodyClass: 'portada',
   });
 }
 
@@ -376,66 +360,62 @@ function gallery(p) {
 function projectPage(p, i) {
   const next = proyectos[(i + 1) % proyectos.length];
   const c = coverOf(p);
-  const chapters = [
-    ['intencion', 'Intención'], ['reto', 'El reto'], ['roadmap', 'Roadmap'],
-    p.decisiones.length && ['decisiones', 'Decisiones'], ['galeria', 'El trabajo'],
-    p.metricas.length && p.galeria[0].tipo !== 'insights' && ['resultados', 'En cifras'], ['aprendizaje', 'Aprendizaje'],
-  ].filter(Boolean);
-  const label = id => { const k = chapters.findIndex(ch => ch[0] === id); return `<span class="chapter-label"><b>${pad(k + 1)}</b>/ ${pad(chapters.length)} · ${chapters[k][1]}</span>`; };
+  const t = tono(p), tn = tono(next);
+  const cifras = p.metricas.length && p.galeria[0].tipo !== 'insights';
 
   const body = `
 <div class="progress" aria-hidden="true"></div>
-<section class="p-hero">
-  <div class="wrap">
-    <nav class="crumbs" aria-label="Ruta"><a href="/">inicio</a><span>/</span><a href="/#indice">proyectos</a><span>/</span><span aria-current="page">${p.slug}</span></nav>
-    <div class="p-tags reveal">${p.disciplinas.map(d => `<span class="tag">${esc(d)}</span>`).join('')}</div>
-    <h1 data-split>${esc(p.titulo)}</h1>
-    <p class="p-sub reveal" style="--d:.3s">${esc(p.subtitulo)}</p>
-    ${p.enlace ? `<div class="p-cta reveal" style="--d:.4s"><a class="btn" href="${p.enlace.url}" target="_blank" rel="noopener">${esc(p.enlace.label)} ${ico.arrow}</a></div>` : ''}
-    <dl class="meta reveal" style="--d:.45s">
+<section class="c-hero scene" data-scene="caso" style="--bg:${t.bg};--ink:${t.ink}">
+  <div class="layer depth-0 trama" data-depth="0" aria-hidden="true"></div>
+  <div class="layer depth-4 c-cabeza" data-depth="4">
+    <a class="c-volver" href="/#archivo">← Archivo</a>
+    <h1 data-lines>${esc(p.titulo)}</h1>
+    <p class="c-sub rv">${esc(p.subtitulo)}</p>
+    <p class="c-meta rv">${esc(p.disciplinas.join(' · '))} — ${esc(p.anio)}</p>
+    ${p.enlace ? `<a class="boton rv" href="${p.enlace.url}" target="_blank" rel="noopener">${esc(p.enlace.label)} ${ico.arrow}</a>` : ''}
+  </div>
+  <div class="c-portada layer depth-3" data-depth="3">${c ? img(c, { alt: `Portada de ${p.titulo}`, priority: true }) : typeCover(p)}</div>
+</section>
+
+${cifras ? `<section class="c-cifras" style="--bg:${t.bg};--ink:${t.ink}" aria-label="En cifras">${p.metricas.map(m => `<div class="rv"><b data-count>${esc(m.v)}</b><span>${esc(m.l)}</span></div>`).join('')}</section>` : ''}
+
+<section class="c-obra" id="galeria" aria-label="El trabajo"><div class="gallery">${gallery(p)}</div></section>
+
+<section class="c-final" style="--bg:${t.bg};--ink:${t.ink}" aria-label="Aprendizaje">
+  <p data-luz>${esc(p.aprendizaje)}</p>
+</section>
+
+<details class="c-historia">
+  <summary data-cursor="Abre"><span>La historia completa</span><i aria-hidden="true">+</i></summary>
+  <div class="c-historia-cuerpo">
+    <h2>La intención</h2><p>${esc(p.intencion)}</p>
+    <h2>El reto</h2><p>${esc(p.reto)}</p>
+    <h2>Paso a paso</h2>
+    <ol class="c-pasos">${p.roadmap.map(r => `<li><span>${esc(r.fase)}</span><h3>${esc(r.titulo)}</h3><p>${esc(r.texto)}</p></li>`).join('')}</ol>
+    ${p.decisiones.length ? `<h2>Decisiones</h2><div class="c-decisiones">${p.decisiones.map(d => `<div><h3>${esc(d.t)}</h3><p>${esc(d.d)}</p></div>`).join('')}</div>` : ''}
+    <dl class="c-ficha">
       <div><dt>Rol</dt><dd>${esc(p.rol)}</dd></div>
-      <div><dt>Año</dt><dd>${esc(p.anio)}</dd></div>
       <div><dt>Duración</dt><dd>${esc(p.duracion)}</dd></div>
       <div><dt>Equipo</dt><dd>${esc(p.equipo)}</dd></div>
       <div><dt>Herramientas</dt><dd>${esc(p.herramientas.join(', '))}</dd></div>
     </dl>
-    <div class="p-cover">${c ? img(c, { alt: `Portada de ${p.titulo}`, priority: true }) : typeCover(p)}</div>
   </div>
-</section>
+</details>
 
-<div class="wrap p-layout">
-  <nav class="toc" aria-label="Capítulos">${chapters.map(([id, t]) => `<a href="#${id}">${t}</a>`).join('')}</nav>
-  <div>
-    <section class="chapter" id="intencion">${label('intencion')}<p class="lead-quote reveal">${esc(p.intencion)}</p></section>
-    <section class="chapter" id="reto">${label('reto')}<div class="prose reveal"><p>${esc(p.reto)}</p></div></section>
-    <section class="chapter" id="roadmap">${label('roadmap')}
-      <h2 data-split>Cómo se hizo, paso a paso</h2>
-      <ol class="roadmap" style="list-style:none;margin:0;padding:0">
-        <span class="log-fill" data-progress aria-hidden="true"></span>
-        ${p.roadmap.map((r, k) => `<li class="rm-step"><span class="rm-node">${pad(k + 1)}</span><div class="rm-card reveal"><span class="fase">${esc(r.fase)}</span><h3>${esc(r.titulo)}</h3><p>${esc(r.texto)}</p></div></li>`).join('')}
-      </ol>
-    </section>
-    ${p.decisiones.length ? `<section class="chapter" id="decisiones">${label('decisiones')}<h2 data-split>Decisiones que marcaron el resultado</h2><div class="decisions">${p.decisiones.map((d, k) => `<div class="decision reveal" style="--d:${(k % 2) * .08}s"><span>decisión_${pad(k + 1)}</span><h3>${esc(d.t)}</h3><p>${esc(d.d)}</p></div>`).join('')}</div></section>` : ''}
-    <section class="chapter" id="galeria">${label('galeria')}<h2 data-split>El trabajo</h2><div class="gallery">${gallery(p)}</div></section>
-    ${chapters.some(ch => ch[0] === 'resultados') ? `<section class="chapter" id="resultados">${label('resultados')}<div class="metrics reveal">${p.metricas.map(m => `<div class="metric"><b data-count>${esc(m.v)}</b><span>${esc(m.l)}</span></div>`).join('')}</div></section>` : ''}
-    <section class="chapter" id="aprendizaje">${label('aprendizaje')}<div class="learning reveal"><p>${esc(p.aprendizaje)}</p></div></section>
-  </div>
-</div>
-
-<a class="next" href="/proyectos/${next.slug}/">
-  <div class="wrap">
-    <div><span class="kicker">Siguiente proyecto</span><h2 style="margin-top:18px">${esc(next.titulo)}</h2><p class="muted" style="margin-top:14px;max-width:44ch">${esc(next.resumen)}</p></div>
-    <div class="next-media">${coverOf(next) ? img(coverOf(next), {}) : typeCover(next)}</div>
-  </div>
+<a class="siguiente" href="/proyectos/${next.slug}/" style="--bg:${tn.bg};--ink:${tn.ink}" data-cursor="Ver">
+  <small>Siguiente</small>
+  <h2>${esc(next.titulo)}</h2>
+  <div class="siguiente-img" aria-hidden="true">${coverOf(next) ? img(coverOf(next)) : typeCover(next)}</div>
 </a>
 <div class="lightbox" role="dialog" aria-modal="true" aria-label="Imagen ampliada"><button class="lightbox-close" aria-label="Cerrar">${ico.close}</button><img alt=""></div>`;
 
   return layout({
-    title: `${p.titulo} · Caso de estudio · ${perfil.nombre}`,
+    title: `${p.titulo} · ${perfil.nombre}`,
     description: p.resumen,
     path: `/proyectos/${p.slug}/`,
-
     body,
+    bodyClass: 'caso',
+    bg: t.bg,
   });
 }
 
@@ -452,14 +432,16 @@ let esbuild = null;
 try { esbuild = await import('esbuild'); } catch { console.warn('! esbuild no está instalado (npm install): CSS y JS sin minificar'); }
 const minify = async (code, loader) => esbuild ? (await esbuild.transform(code, { loader, minify: true, target: 'es2019' })).code : code;
 const css = await minify(readFileSync(join(SRC, 'css/fuentes.css'), 'utf8') + readFileSync(join(SRC, 'css/estilos.css'), 'utf8'), 'css');
-const js = await minify(readFileSync(join(SRC, 'js/main.js'), 'utf8'), 'js');
+// GSAP, ScrollTrigger y Lenis se sirven desde el propio sitio, unidos al JS principal (sin terceros).
+const vendor = ['gsap', 'ScrollTrigger', 'lenis'].map(f => readFileSync(join(SRC, `js/vendor/${f}.min.js`), 'utf8')).join(';\n');
+const js = vendor + ';\n' + await minify(readFileSync(join(SRC, 'js/main.js'), 'utf8'), 'js');
 write('css/estilos.css', css);
 write('js/main.js', js);
 const CSS_URL = `/css/estilos.css?v=${md5(css)}`;
 const JS_URL = `/js/main.js?v=${md5(js)}`;
 // Precarga de las dos fuentes visibles en la primera pantalla (títulos y texto).
 const PRELOAD_FONTS = readdirSync(join(SRC, 'assets/fonts'))
-  .filter(f => /^(space-grotesk|inter)-/.test(f))
+  .filter(f => /^(bricolage|inter)/.test(f))
   .map(f => `<link rel="preload" href="/assets/fonts/${f}" as="font" type="font/woff2" crossorigin>`).join('\n');
 write('index.html', home());
 proyectos.forEach((p, i) => {
@@ -467,14 +449,14 @@ proyectos.forEach((p, i) => {
   write(`proyectos/${p.slug}/index.html`, projectPage(p, i));
 });
 write('404.html', layout({
-  title: 'Página no encontrada · El Alquimista Digital', description: 'Esta página no existe.', path: '/404',
-  body: `<section class="hero"><div class="wrap" style="display:block"><span class="kicker">Error 404</span><h1 data-split>Esta fórmula no existe<span class="cursor"></span></h1><p class="hero-lead">La página que buscas se movió o nunca existió.</p><div class="hero-cta"><a class="btn" href="/">Volver al inicio ${ico.arrow}</a></div></div></section>`,
+  title: `Página no encontrada · ${perfil.nombre}`, description: 'Esta página no existe.', path: '/404', bodyClass: 'caso',
+  body: `<section class="perdido"><h1>404</h1><p class="mano">este sticker se despegó</p><a class="boton" href="/">Volver al inicio ${ico.arrow}</a></section>`,
 }));
 
 const urls = ['/', ...proyectos.map(p => `/proyectos/${p.slug}/`)];
 write('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(u => `  <url><loc>${SITE}${u}</loc></url>`).join('\n')}\n</urlset>\n`);
 write('robots.txt', `User-agent: *\nAllow: /\n\nSitemap: ${SITE}/sitemap.xml\n`);
-write('llms.txt', `# ${perfil.nombre} · ${perfil.marca}\n\n> ${perfil.rol}. ${perfil.ciudad}.\n\n## Proyectos\n${proyectos.map(p => `- [${p.titulo}](${SITE}/proyectos/${p.slug}/): ${p.resumen}`).join('\n')}\n\n## Contacto\n- ${perfil.email}\n`);
+write('llms.txt', `# ${perfil.nombre}\n\n> ${perfil.rol}. ${perfil.ciudad}.\n\n## Proyectos\n${proyectos.map(p => `- [${p.titulo}](${SITE}/proyectos/${p.slug}/): ${p.resumen}`).join('\n')}\n\n## Contacto\n- ${perfil.email}\n`);
 
 if (missing.size) { console.error('Faltan archivos:\n' + [...missing].join('\n')); process.exit(1); }
 console.log(`Sitio generado en dist/ · ${urls.length} páginas · CSS ${(css.length / 1024).toFixed(1)} KB · JS ${(js.length / 1024).toFixed(1)} KB${esbuild ? ' (minificados)' : ''} · ${SITE}`);
