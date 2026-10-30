@@ -166,15 +166,6 @@ html.fx .portal-velo { opacity: 0; }
 .sticker.is-drag { cursor: grabbing; }
 .sticker.is-drag img { filter: drop-shadow(0 22px 18px rgba(0, 0, 0, .4)); }
 
-/* Proceso: pila de cartas ------------------------------------------------ */
-.paso { position: sticky; top: 0; min-height: 100svh; background: var(--bg); color: var(--ink); display: grid; align-items: end; padding: 84px var(--gutter) 26px; border-radius: 34px 34px 0 0; }
-.paso-texto { z-index: 1; }
-.paso-n { font: 600 2rem/1 var(--mano); }
-.paso h3 { font: 800 clamp(4.4rem, 19vw, 20rem)/.84 var(--display); font-stretch: 75%; letter-spacing: -.016em; margin-top: 8px; }
-.paso p { font: 600 clamp(1.25rem, 2.6vw, 2.2rem)/1.15 var(--display); max-width: 24em; margin-top: 14px; }
-.paso-sticker { position: absolute; right: 6vw; top: 12svh; width: clamp(170px, 26vw, 400px); rotate: 8deg; }
-.paso-sticker img { width: 100%; filter: drop-shadow(0 14px 16px rgba(0, 0, 0, .3)); }
-
 /* Sobre mí --------------------------------------------------------------- */
 .yo { background: var(--papel); color: var(--tinta); padding: clamp(90px, 15vw, 190px) var(--gutter) 90px; z-index: 2; }
 .yo-frase { font: 800 clamp(2.2rem, 6.4vw, 6.8rem)/.98 var(--display); font-stretch: 75%; letter-spacing: -.025em; max-width: 15.5em; }
@@ -349,7 +340,6 @@ html.cursor-activo .cursor { display: grid; }
   .indice .d { display: none; }
   .preview { display: none; }
   .sticker:nth-child(n+15) { display: none; }
-  .paso-sticker { right: 8vw; top: 13svh; width: 52vw; }
   .scrollshot { overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
   .scrollshot:hover img, .scrollshot:focus-visible img, .phone-screen.scrollshot:hover img { transform: none; }
   .scroll-hint { display: none; }

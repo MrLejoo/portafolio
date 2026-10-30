@@ -191,14 +191,6 @@ function home() {
     [`${P}/disney/post-23.webp`, `${P}/the-big-bang-theory/88.webp`, `${P}/f1/65.webp`, `${P}/disney/post-29.webp`],
     [`${P}/travel/109.webp`, `${P}/boho/103.webp`, `${P}/travel/103.webp`, `${P}/boho/102.webp`],
   ];
-  const pasos = [
-    ['Escuchar', 'Busco el problema verdadero, no el que aparece en el brief.', '#FFD53D', '#14110A', `${S}/friends/friends-17.webp`],
-    ['Definir', 'Si no se puede medir, todavía no está definido.', '#FF4A1F', '#14110A', `${S}/tbbt/tbbt-10.webp`],
-    ['Dibujar', 'Iterar en diseño cuesta horas; en código, semanas.', '#FF8CC6', '#2A0B1C', `${S}/boho/boho-3.webp`],
-    ['Escribir', 'El texto decide si un botón se pulsa.', '#B8A6FF', '#14103A', `${S}/friends/friends-22.webp`],
-    ['Construir', 'Del prototipo a producción, sin soltar el detalle.', '#0E7A5A', '#F5F0E6', `${S}/disney/castillo-disney.webp`],
-    ['Medir', 'Cada versión es la hipótesis de la siguiente.', '#2430F0', '#FFFFFF', `${S}/f1/week.webp`],
-  ];
 
   const body = `
 <section class="hero scene" data-scene="hero" aria-label="Portada">
@@ -265,17 +257,6 @@ function home() {
     <button class="boton boton--mini" data-revolver>Revolver</button>
   </div>
   <div class="lab">${stickers.map(s => `<div class="sticker" data-cursor="Arrastra">${img(s, { extra: ' draggable="false"' })}</div>`).join('')}</div>
-</section>
-
-<section class="pasos" id="proceso" aria-label="Cómo trabajo">
-  ${pasos.map(([t, d, bg, ink, s], i) => `<article class="paso scene" style="--bg:${bg};--ink:${ink};--i:${i}">
-    <div class="layer depth-3 paso-sticker" data-depth="3" aria-hidden="true">${img(s)}</div>
-    <div class="layer depth-4 paso-texto" data-depth="4">
-      <span class="paso-n">${i + 1}/${pasos.length}</span>
-      <h3>${t}</h3>
-      <p>${d}</p>
-    </div>
-  </article>`).join('')}
 </section>
 
 <section class="yo scene" id="sobre-mi" aria-label="Sobre mí">

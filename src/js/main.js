@@ -202,15 +202,6 @@
       .fromTo('.mirada-texto', { color: '#111014', scale: .86 }, { color: '#ffffff', scale: 1, duration: .55 }, .1);
   }
 
-  /* Pasos: la carta de debajo se hunde ------------------------------------- */
-  const pasos = $$('.paso');
-  if (pasos.length && fx) {
-    pasos.forEach((p, i) => {
-      G.from($('.paso-sticker', p), { scale: .5, rotate: -30, duration: 1, ease: 'back.out(1.8)', scrollTrigger: { trigger: p, start: 'top 45%', toggleActions: 'play none none reverse' } });
-      if (i < pasos.length - 1) G.to(p, { scale: .93, ease: 'none', transformOrigin: '50% 0', scrollTrigger: { trigger: pasos[i + 1], start: 'top bottom', end: 'top top', scrub: true } });
-    });
-  }
-
   /* Hablemos: letras que saltan -------------------------------------------- */
   const hablemos = $('.hablemos');
   if (hablemos && fx) {
