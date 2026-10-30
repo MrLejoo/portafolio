@@ -61,6 +61,9 @@ const ico = {
   flecha: '<svg class="garabato" viewBox="0 0 120 70" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path pathLength="1" d="M4 12c22 34 58 44 104 30M92 26l17 16-21 12"/></svg>',
 };
 
+// Importes de la Mesa de trabajo, con el mismo formato que usa main.js al recalcularlos.
+const euros = n => n.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+
 const siglas = perfil.nombre.split(' ').map(w => w[0]).join('');
 
 /* Plantilla común ------------------------------------------------------- */
@@ -105,12 +108,13 @@ ${footer()}
 function header(path) {
   const home = path === '/';
   const l = h => (home ? h : '/' + h);
+  const actual = path === '/proyectos/' ? ' aria-current="page"' : '';
   return `<header class="header">
   <a class="logo" href="/" aria-label="Inicio · ${esc(perfil.nombre)}">${siglas}</a>
   <button class="menu-btn" aria-label="Abrir menú" aria-expanded="false" aria-controls="nav"><span>Menú</span></button>
   <nav class="nav" id="nav" aria-label="Principal">
     <a href="${l('#trabajo')}">Trabajo</a>
-    <a href="${l('#archivo')}">Archivo</a>
+    <a href="/proyectos/"${actual}>Proyectos</a>
     <a href="${l('#mesa')}">Mesa</a>
     <a href="${l('#sobre-mi')}">Yo</a>
     <a href="${l('#contacto')}">Hablemos</a>
@@ -169,37 +173,93 @@ function cartel(p, i) {
 }
 
 /* Portada --------------------------------------------------------------- */
+function mesa() {
+  const acentos = [['Verde', '#0E7A5A'], ['Ultramar', '#2430F0'], ['Tomate', '#E5431A'], ['Violeta', '#6C4DE6']];
+  const opcion = (name, value, label, on) => `<label class="op"><input type="radio" name="${name}" value="${value}"${on ? ' checked' : ''}><span>${label}</span></label>`;
+  const ingresos = 2890, gastos = 2250;
+  const barra = (id, nombre, gasto, limite) => `<div class="demo-fila"><p><span>${nombre}</span><b data-v="${id}">${euros(gasto)}</b></p><div class="demo-barra"><i data-b="${id}" style="width:${Math.min(100, Math.round(gasto / limite * 100))}%"></i></div></div>`;
+  return `<section class="mesa scene" id="mesa" aria-label="Mesa de trabajo">
+  <div class="layer depth-0 trama" data-depth="0" aria-hidden="true"></div>
+  <div class="mesa-cab layer depth-4" data-depth="4">
+    <h2 data-lines>Mesa <em>de trabajo</em></h2>
+    <p>Diseño y código en el mismo sitio. Este componente es real: toca los controles y mira cómo responden la interfaz y el código.</p>
+  </div>
+  <div class="banco layer depth-4" data-depth="4">
+    <div class="panel banco-controles rv">
+      <p class="panel-titulo">Datos</p>
+      <label class="rango"><span>Ingresos <b data-v="r-ingresos">${euros(ingresos)}</b></span><input type="range" name="ingresos" min="500" max="5000" step="10" value="${ingresos}"></label>
+      <label class="rango"><span>Gastos <b data-v="r-gastos">${euros(gastos)}</b></span><input type="range" name="gastos" min="0" max="5000" step="10" value="${gastos}"></label>
+      <p class="panel-titulo">Diseño</p>
+      <fieldset><legend>Tema</legend><div class="ops">${opcion('tema', 'claro', 'Claro', true)}${opcion('tema', 'oscuro', 'Oscuro')}</div></fieldset>
+      <fieldset><legend>Acento</legend><div class="ops ops--color">${acentos.map(([n, c], i) => `<label class="op-color" style="--c:${c}"><input type="radio" name="acento" value="${c}"${i ? '' : ' checked'}><span class="sr">${n}</span></label>`).join('')}</div></fieldset>
+      <label class="rango"><span>Radio <b data-v="r-radio">16 px</b></span><input type="range" name="radio" min="0" max="28" step="2" value="16"></label>
+      <fieldset><legend>Densidad</legend><div class="ops">${opcion('espacio', '14', 'Compacta')}${opcion('espacio', '20', 'Normal', true)}${opcion('espacio', '28', 'Amplia')}</div></fieldset>
+      <label class="interruptor"><input type="checkbox" name="medidas"><span>Mostrar medidas</span></label>
+    </div>
+    <div class="lienzo rv">
+      <article class="demo" aria-label="Presupuesto de ejemplo">
+        <header class="demo-cab"><span>Octubre 2026</span><span class="demo-estado" data-estado="ok" role="status">Vas bien</span></header>
+        <p class="demo-etiqueta">Saldo disponible</p>
+        <p class="demo-saldo" data-v="saldo">${euros(ingresos - gastos)}</p>
+        ${barra('necesidades', 'Necesidades', gastos * .58, ingresos * .5)}
+        ${barra('deseos', 'Deseos', gastos * .2, ingresos * .3)}
+        ${barra('ahorro', 'Ahorro', gastos * .22, ingresos * .2)}
+      </article>
+      <p class="lienzo-pie"><span data-contraste>Contraste del acento: 5,3:1 · AA</span> <a href="/proyectos/caudal/" data-cursor="Ver">Basado en Caudal ${ico.arrow}</a></p>
+    </div>
+    <div class="panel banco-codigo rv">
+      <p class="panel-titulo">presupuesto.css</p>
+<pre><code>.presupuesto {
+  <i>--acento:</i> <b data-c="acento">#0E7A5A</b>;
+  <i>--fondo:</i> <b data-c="fondo">#FFFFFF</b>;
+  <i>--radio:</i> <b data-c="radio">16px</b>;
+  <i>--espacio:</i> <b data-c="espacio">20px</b>;
+}</code></pre>
+      <p class="panel-titulo">regla.js</p>
+<pre><code><i>const</i> limite = ingresos * .5;
+<u>// <span data-c="limite">${euros(ingresos * .5)}</span></u>
+<i>const</i> estado = gasto &gt; limite
+  ? <b>'excedido'</b> : <b>'ok'</b>;
+<u>// <span data-c="estado">'ok'</span></u></code></pre>
+    </div>
+  </div>
+</section>`;
+}
+
 function home() {
-  const destacados = proyectos.filter(p => p.destacado);
-  const counts = Object.fromEntries(disciplinas.map(d => [d, proyectos.filter(p => p.disciplinas.includes(d)).length]));
-  const S = '/assets/img/stickers', P = '/assets/img/posts';
-  const stickers = stickersList(24);
-  const pegados = [
-    [`${S}/disney/pelota-pixar.webp`, 71, 4, 12, -14],
-    [`${S}/friends/friends-19.webp`, 56, 10, 15, 9],
-    [`${S}/boho/boho-5.webp`, 2, 37, 11, -9],
-    [`${S}/disney/nemo.webp`, 28, 40, 13, 7],
-    [`${S}/personalizadas/pizza-planet.webp`, 60, 69, 15, -6],
-    [`${S}/f1/box.webp`, 38, 2, 8, 11],
-    [`${S}/tbbt/tbbt-10.webp`, 82, 66, 10, 14],
-    [`${S}/personalizadas/nike.webp`, 40, 68, 12, -11],
-    [`${S}/travel/travel-13.webp`, 4, 8, 11, 12],
+  const orden = ['caudal', 'diskpulse', 'mixing-kit', 'stickercom-tienda', 'wander', 'velvet-spirit', 'reaccionar-vs-responder'];
+  const destacados = orden.map(s => bySlug[s]);
+  const I = '/assets/img';
+  const piezas = [
+    ['libre', `${I}/caudal/icono.webp`, 90, 7, 7, -9],
+    ['pan', `${I}/caudal/resumen-oscuro.webp`, 70, 8, 18, 5],
+    ['tel', `${I}/wander/pantalla-explorar.webp`, 5, 34, 8, -7],
+    ['pan', `${I}/mixingkit/sunrise.webp`, 17, 40, 18, 4],
+    ['pan', `${I}/diskpulse/mapa.webp`, 54, 69, 20, -4],
+    ['libre', `${I}/diskpulse/icono.webp`, 77, 74, 7.5, 11],
+    ['tel', `${I}/velvet/recetas-movil-portada.webp`, 88, 66, 7, 6],
   ];
   const muro = [
-    [`${P}/disney/post-1.webp`, `${P}/f1/69.webp`, `${P}/harry-potter/79.webp`, `${P}/disney/post-21.webp`],
-    [`${P}/boho/101.webp`, `${P}/disney/post-17.webp`, `${P}/friends/friends-13.webp`, `${P}/travel/105.webp`],
-    [`${P}/disney/post-23.webp`, `${P}/the-big-bang-theory/88.webp`, `${P}/f1/65.webp`, `${P}/disney/post-29.webp`],
-    [`${P}/travel/109.webp`, `${P}/boho/103.webp`, `${P}/travel/103.webp`, `${P}/boho/102.webp`],
+    [`${I}/caudal/resumen.webp`, `${I}/wander/pantalla-explorar.webp`, `${I}/diskpulse/mapa.webp`, `${I}/velvet/recetas-portada.webp`],
+    [`${I}/mixingkit/sunrise.webp`, `${I}/webs/stickercom-home-desk.webp`, `${I}/velvet/recetas-movil-portada.webp`, `${I}/caudal/seguimiento.webp`],
+    [`${I}/diskpulse/paleta.webp`, `${I}/wander/pantalla-perfil.webp`, `${I}/webs/roiexpress-desk.webp`, `${I}/mixingkit/portada.webp`],
+    [`${I}/webs/wadirecto-desk.webp`, `${I}/caudal/resumen-oscuro.webp`, `${I}/mixingkit/movil-coctel.webp`, `${I}/velvet/mi-bar-portada.webp`],
   ];
+  const abanico = [`${I}/webs/roiexpress-desk.webp`, `${I}/ui/checkout-process.webp`, `${I}/bokditos/portada.webp`, `${I}/webs/wadirecto-desk.webp`, `${I}/loremcraft/web-portada.webp`];
+  const con = d => proyectos.filter(p => p.disciplinas.includes(d)).length;
+  const pieza = ([tipo, s, x, y, w, r]) => {
+    const foto = img(s, { lazy: false, extra: ' draggable="false"' });
+    return `<div class="pegado pegado--${tipo}" data-cursor="Arrastra" style="--x:${x};--y:${y};--w:${w};--r:${r}deg">${tipo === 'tel' ? `<div class="phone"><div class="phone-screen">${foto}</div></div>` : foto}</div>`;
+  };
 
   const body = `
 <section class="hero scene" data-scene="hero" aria-label="Portada">
   <div class="layer depth-0 trama" data-depth="0" aria-hidden="true"></div>
 
   <div class="portal" data-depth="3">
-    <div class="muro" aria-hidden="true">${muro.map((col, i) => `<div class="muro-col">${col.map(s => img(s, { lazy: false })).join('')}</div>`).join('')}</div>
+    <div class="muro" aria-hidden="true">${muro.map(col => `<div class="muro-col">${col.map(s => img(s)).join('')}</div>`).join('')}</div>
     <div class="portal-velo" aria-hidden="true"></div>
-    <p class="portal-frase"><span>Dibujo, compongo, animo.</span> <em>Y si hace falta, también lo construyo.</em></p>
+    <p class="portal-frase"><span>Diseño la experiencia.</span> <em>Y escribo el código que la hace real.</em></p>
   </div>
 
   <h1 class="nombre layer depth-4" data-depth="4" aria-label="${esc(perfil.nombre)}">
@@ -209,10 +269,10 @@ function home() {
   </h1>
 
   <div class="pegados layer depth-5" data-depth="5" aria-hidden="true">
-    ${pegados.map(([s, x, y, w, r]) => `<div class="pegado" data-cursor="Despega" style="--x:${x};--y:${y};--w:${w};--r:${r}deg">${img(s, { lazy: false, extra: ' draggable="false"' })}</div>`).join('')}
+    ${piezas.map(pieza).join('')}
   </div>
 
-  <p class="hero-nota"><span>despega los stickers</span>${ico.flecha}</p>
+  <p class="hero-nota"><span>arrastra las pantallas</span>${ico.flecha}</p>
   <p class="hero-rol">${esc(perfil.rol)}</p>
 </section>
 
@@ -226,48 +286,34 @@ function home() {
   </div>
 </section>
 
-<section class="archivo scene" id="archivo" aria-label="Archivo">
-  <div class="layer depth-0 trama trama--tinta" data-depth="0" aria-hidden="true"></div>
-  <div class="layer depth-4" data-depth="4">
-    <h2 class="gigante" data-lines>Archivo</h2>
-    <div class="filtros" role="group" aria-label="Filtrar por disciplina">
-      <button class="chip" data-filter="*" aria-pressed="true">Todo<sup>${proyectos.length}</sup></button>
-      ${disciplinas.map(d => `<button class="chip" data-filter="${esc(d)}" aria-pressed="false">${esc(d)}<sup>${counts[d]}</sup></button>`).join('')}
-    </div>
-    <p class="sr" id="index-live" aria-live="polite"></p>
-    <ul class="indice">
-      ${proyectos.map(p => { const t = tono(p); return `<li data-tags="${esc(p.disciplinas.join('|'))}" style="--bg:${t.bg};--ink:${t.ink}"><a href="/proyectos/${p.slug}/" data-img="${coverOf(p) ? asset(coverOf(p)) : ''}" data-cursor="Ver">
-        <span class="t">${esc(p.titulo)}</span><span class="d">${esc(p.disciplinas[0])}</span><span class="y">${esc(p.anio.slice(-4))}</span>
-      </a></li>`; }).join('')}
-    </ul>
-  </div>
-  <div class="preview" aria-hidden="true"><img alt=""></div>
+<section class="mas scene" aria-label="Más proyectos">
+  <a class="mas-enlace" href="/proyectos/" data-cursor="Entra">
+    <div class="mas-abanico" aria-hidden="true">${abanico.map((s, i) => `<div class="mas-carta" style="--i:${i - 2}">${img(s)}</div>`).join('')}</div>
+    <h2 data-lines>¿Quieres ver <em>más?</em></h2>
+    <p class="mas-pie"><span>${proyectos.length} proyectos de UX/UI, desarrollo, motion y más</span> <span class="boton">Ver proyectos ${ico.arrow}</span></p>
+  </a>
 </section>
+
+${mesa()}
 
 <section class="mirada scene" aria-label="Fotografía">
   <div class="mirada-foto layer depth-3" data-depth="3">${img('/assets/img/foto/dsc00037.webp', { alt: 'Mazorca de cacao roja sobre una rama' })}</div>
   <a class="mirada-texto layer depth-4" data-depth="4" href="/proyectos/fotografia/" data-cursor="Ver"><span>También</span> <em>miro</em></a>
 </section>
 
-<section class="mesa scene" id="mesa" aria-label="Mesa de juego con ilustraciones">
-  <div class="layer depth-0 tapete" data-depth="0" aria-hidden="true"></div>
-  <div class="mesa-rotulo layer depth-4" data-depth="4">
-    <h2 data-lines>Mesa <em>de juego</em></h2>
-    <p class="mano">más de 200 stickers dibujados por mí. haz un desastre.</p>
-    <button class="boton boton--mini" data-revolver>Revolver</button>
-  </div>
-  <div class="lab">${stickers.map(s => `<div class="sticker" data-cursor="Arrastra">${img(s, { extra: ' draggable="false"' })}</div>`).join('')}</div>
-</section>
-
 <section class="yo scene" id="sobre-mi" aria-label="Sobre mí">
   <div class="layer depth-4" data-depth="4">
-    <p class="yo-frase" data-luz>Vengo del marketing, me formé en UX/UI y dibujo stickers. Mezclo disciplinas que casi siempre viven separadas, y las junto hasta que algo se pueda tocar.</p>
-    <div class="sellos" aria-label="En cifras">
-      <div class="sello sello--a"><b data-count>${proyectos.length}</b><span>proyectos</span></div>
-      <div class="sello sello--b"><b data-count>200+</b><span>ilustraciones</span></div>
-      <div class="sello sello--c"><b data-count>${disciplinas.length}</b><span>disciplinas</span></div>
+    <p class="yo-frase" data-luz>Diseño productos digitales y también los construyo. Vengo del marketing: empiezo por lo que necesita el negocio y no suelto el trabajo hasta que funciona en producción.</p>
+    <div class="cifras" aria-label="En cifras">
+      <div class="rv"><b data-count>${proyectos.length}</b><span>proyectos</span></div>
+      <div class="rv"><b data-count>${con('UX/UI')}</b><span>con UX/UI</span></div>
+      <div class="rv"><b data-count>${con('Desarrollo')}</b><span>desarrollados por mí</span></div>
     </div>
-    <ul class="oficios">${['UX/UI', 'Ilustración', 'Motion', 'Copywriting', 'Fotografía', 'Desarrollo web'].map(o => `<li>${o}</li>`).join('')}</ul>
+    <div class="oficios">
+      <div class="rv"><h3>UX/UI</h3><p>Investigación con usuarios, prototipado, sistemas de diseño, Figma</p></div>
+      <div class="rv"><h3>Desarrollo</h3><p>JavaScript, Python, Supabase, Three.js, Cloudflare</p></div>
+      <div class="rv"><h3>Además</h3><p>Motion, copywriting, ilustración, fotografía</p></div>
+    </div>
   </div>
 </section>
 
@@ -284,11 +330,47 @@ function home() {
 </section>`;
 
   return layout({
-    title: `${perfil.nombre} · Diseñador`,
-    description: `Portafolio de ${perfil.nombre}: interfaces, ilustración, motion, copywriting y fotografía.`,
+    title: `${perfil.nombre} · Diseñador UX/UI y desarrollador`,
+    description: `Portafolio de ${perfil.nombre}: productos digitales diseñados y desarrollados de principio a fin, además de motion, copywriting y fotografía.`,
     path: '/',
     body,
     bodyClass: 'portada',
+  });
+}
+
+/* Proyectos ------------------------------------------------------------- */
+function catalogo() {
+  const counts = Object.fromEntries(disciplinas.map(d => [d, proyectos.filter(p => p.disciplinas.includes(d)).length]));
+  // Primero el producto: UX/UI y desarrollo pesan igual; después, cada disciplina en su orden.
+  const peso = p => Math.max(1, Math.min(...p.disciplinas.map(d => disciplinas.indexOf(d))));
+  const lista = [...proyectos].sort((a, b) => peso(a) - peso(b));
+
+  const body = `
+<section class="catalogo" aria-label="Proyectos">
+  <div class="catalogo-cab">
+    <h1 class="gigante" data-lines>Proyectos</h1>
+  </div>
+  <div class="filtros" role="group" aria-label="Filtrar por disciplina">
+    <button class="chip" data-filter="*" aria-pressed="true">Todo<sup>${proyectos.length}</sup></button>
+    ${disciplinas.map(d => `<button class="chip" data-filter="${esc(d)}" aria-pressed="false">${esc(d)}<sup>${counts[d]}</sup></button>`).join('')}
+  </div>
+  <p class="sr" id="index-live" aria-live="polite"></p>
+  <ul class="obras">
+    ${lista.map((p, i) => { const t = tono(p), c = coverOf(p); return `<li data-tags="${esc(p.disciplinas.join('|'))}"><a class="obra" href="/proyectos/${p.slug}/" style="--bg:${t.bg};--ink:${t.ink}" data-cursor="Ver">
+      <div class="obra-img">${c ? img(c, { lazy: i > 3 }) : typeCover(p)}</div>
+      <h2>${esc(p.titulo)}</h2>
+      <p><span>${esc(p.disciplinas.slice(0, 2).join(' · '))}</span><span>${esc(p.anio.slice(-4))}</span></p>
+    </a></li>`; }).join('')}
+  </ul>
+</section>`;
+
+  return layout({
+    title: `Proyectos · ${perfil.nombre}`,
+    description: `Todos los proyectos de ${perfil.nombre}: UX/UI, desarrollo, motion, copywriting, diseño gráfico y fotografía.`,
+    path: '/proyectos/',
+    body,
+    bodyClass: 'caso',
+    bg: '#F5F0E6',
   });
 }
 
@@ -350,7 +432,7 @@ function projectPage(p, i) {
 <section class="c-hero scene" data-scene="caso" style="--bg:${t.bg};--ink:${t.ink}">
   <div class="layer depth-0 trama" data-depth="0" aria-hidden="true"></div>
   <div class="layer depth-4 c-cabeza" data-depth="4">
-    <a class="c-volver" href="/#archivo">← Archivo</a>
+    <a class="c-volver" href="/proyectos/">← Proyectos</a>
     <h1 data-lines>${esc(p.titulo)}</h1>
     <p class="c-sub rv">${esc(p.subtitulo)}</p>
     <p class="c-meta rv">${esc(p.disciplinas.join(' · '))} — ${esc(p.anio)}</p>
@@ -426,16 +508,17 @@ const PRELOAD_FONTS = readdirSync(join(SRC, 'assets/fonts'))
   .filter(f => /^(bricolage|inter)/.test(f))
   .map(f => `<link rel="preload" href="/assets/fonts/${f}" as="font" type="font/woff2" crossorigin>`).join('\n');
 write('index.html', home());
+write('proyectos/index.html', catalogo());
 proyectos.forEach((p, i) => {
   p.relacionados?.forEach(r => { if (!bySlug[r]) console.warn(`! ${p.slug}: relacionado inexistente "${r}"`); });
   write(`proyectos/${p.slug}/index.html`, projectPage(p, i));
 });
 write('404.html', layout({
   title: `Página no encontrada · ${perfil.nombre}`, description: 'Esta página no existe.', path: '/404', bodyClass: 'caso',
-  body: `<section class="perdido"><h1>404</h1><p class="mano">este sticker se despegó</p><a class="boton" href="/">Volver al inicio ${ico.arrow}</a></section>`,
+  body: `<section class="perdido"><h1>404</h1><p class="mano">esta pantalla no está en el flujo</p><a class="boton" href="/">Volver al inicio ${ico.arrow}</a></section>`,
 }));
 
-const urls = ['/', ...proyectos.map(p => `/proyectos/${p.slug}/`)];
+const urls = ['/', '/proyectos/', ...proyectos.map(p => `/proyectos/${p.slug}/`)];
 write('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(u => `  <url><loc>${SITE}${u}</loc></url>`).join('\n')}\n</urlset>\n`);
 write('robots.txt', `User-agent: *\nAllow: /\n\nSitemap: ${SITE}/sitemap.xml\n`);
 write('llms.txt', `# ${perfil.nombre}\n\n> ${perfil.rol}. ${perfil.ciudad}.\n\n## Proyectos\n${proyectos.map(p => `- [${p.titulo}](${SITE}/proyectos/${p.slug}/): ${p.resumen}`).join('\n')}\n\n## Contacto\n- ${perfil.email}\n`);

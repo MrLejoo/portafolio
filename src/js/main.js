@@ -106,7 +106,7 @@
     ST.addEventListener('refreshInit', () => { medir(); pintar(); });
     document.fonts?.ready.then(() => { medir(); pintar(); ST.refresh(); });
 
-    // Entrada: letras que caen y stickers que se pegan de golpe.
+    // Entrada: letras que caen y pantallas que aterrizan sobre el póster.
     G.from($$('.l', nombre), { yPercent: 115, duration: 1.1, ease: 'expo.out', stagger: { each: .03, from: 'random' } });
     G.from(pegados, { scale: 2.1, autoAlpha: 0, rotate: () => G.utils.random(-40, 40), duration: .55, ease: 'back.out(2.4)', stagger: .07, delay: .55 });
     G.from('.hero-nota, .hero-rol', { autoAlpha: 0, duration: .8, delay: 1.5 });
@@ -123,6 +123,8 @@
     tl.set(portal, { clipPath: 'none' }, .56);
     tl.fromTo('.muro', { rotate: -7, scale: 1.3 }, { rotate: 0, scale: 1, duration: .55 }, .1);
     $$('.muro-col').forEach((c, i) => tl.to(c, { yPercent: i % 2 ? 14 : -14, duration: .9 }, .1));
+    // El velo oscurece el muro para que el hueco de la O se lea como hueco; se aclara al entrar y vuelve para la frase.
+    tl.fromTo('.portal-velo', { opacity: 1 }, { opacity: .2, duration: .26 }, .2);
     tl.to('.portal-velo', { opacity: 1, duration: .14 }, .62);
     tl.set('.portal-frase', { visibility: 'visible' }, .62);
     tl.fromTo('.portal-frase span, .portal-frase em', { yPercent: 60, autoAlpha: 0 }, { yPercent: 0, autoAlpha: 1, duration: .14, stagger: .06, ease: 'power3.out' }, .63);
@@ -135,10 +137,10 @@
 
   if (!fine) { const n = $('.hero-nota span'); if (n) n.textContent = 'desliza hacia abajo'; }
 
-  /* Stickers que se despegan (portada) ------------------------------------- */
-  const arrastre = (el, { limite, alSoltar } = {}) => {
+  /* Pantallas que se arrastran (portada) ----------------------------------- */
+  const arrastre = el => {
     el.addEventListener('pointerdown', e => {
-      if (e.pointerType === 'touch' && !el.classList.contains('sticker')) return;
+      if (e.pointerType === 'touch') return;
       e.preventDefault();
       el.setPointerCapture(e.pointerId);
       el.classList.add('is-drag');
@@ -148,8 +150,7 @@
       let lx = e.clientX, vx = 0;
       const move = ev => {
         vx = ev.clientX - lx; lx = ev.clientX;
-        let x = ev.clientX - ox, y = ev.clientY - oy;
-        if (limite) [x, y] = limite(x, y);
+        const x = ev.clientX - ox, y = ev.clientY - oy;
         el._x = x; el._y = y;
         el.style.transform = `translate(${x}px, ${y}px) rotate(${el._r + vx * .9}deg)`;
       };
@@ -160,7 +161,6 @@
         el.removeEventListener('pointermove', move);
         el.removeEventListener('pointerup', up);
         el.removeEventListener('pointercancel', up);
-        alSoltar?.();
       };
       el.addEventListener('pointermove', move);
       el.addEventListener('pointerup', up);
@@ -168,7 +168,7 @@
     });
   };
   arrastre.z = 5;
-  // Un envoltorio interior evita pelearse con los transform de GSAP en el sticker de portada.
+  // Un envoltorio interior evita pelearse con los transform de GSAP en la pieza de portada.
   if (fine) $$('.pegado').forEach(p => {
     const inner = document.createElement('div');
     inner.className = 'pegado-in';
@@ -193,6 +193,10 @@
     }
   }
 
+  /* ¿Quieres ver más?: el abanico se abre con el scroll --------------------- */
+  const abanico = $('.mas-abanico');
+  if (abanico && fx) G.fromTo(abanico, { '--abre': .12 }, { '--abre': 1, ease: 'none', scrollTrigger: { trigger: '.mas', start: 'top 85%', end: 'top 15%', scrub: .5 } });
+
   /* Foto a sangre: ventana que se abre ------------------------------------- */
   const mirada = $('.mirada');
   if (mirada && fx) {
@@ -208,7 +212,6 @@
     G.from($$('.l', hablemos), { yPercent: 110, rotate: () => G.utils.random(-14, 14), duration: 1, ease: 'back.out(1.7)', stagger: .045, scrollTrigger: { trigger: hablemos, start: 'top 92%', once: true } });
     if (fine) $$('.l', hablemos).forEach(l => l.addEventListener('pointerenter', () => G.fromTo(l, { y: 0 }, { y: -26, rotate: G.utils.random(-10, 10), duration: .2, yoyo: true, repeat: 1, ease: 'power2.out', onComplete: () => G.set(l, { rotate: 0 }) })));
   }
-  if (fx) $$('.sello').forEach((s, i) => G.from(s, { scale: 0, rotate: -50, duration: .8, delay: i * .1, ease: 'back.out(2)', scrollTrigger: { trigger: s, start: 'top 92%', once: true } }));
 
   /* Portada del caso: se endereza con el scroll ---------------------------- */
   const cp = $('.c-portada');
@@ -239,62 +242,72 @@
   }, { threshold: .6 });
   $$('[data-count]').forEach(el => countIO.observe(el));
 
-  /* Archivo: filtros y vista previa flotante ------------------------------- */
+  /* Proyectos: filtros ------------------------------------------------------ */
   const chips = $$('.chip[data-filter]');
   chips.forEach(chip => chip.addEventListener('click', () => {
     const f = chip.dataset.filter;
     chips.forEach(c => c.setAttribute('aria-pressed', c === chip));
-    $$('.indice li').forEach(li => { li.hidden = f !== '*' && !li.dataset.tags.split('|').includes(f); });
-    const shown = $$('.indice li:not([hidden])');
-    if (fx) { G.fromTo(shown, { x: -24, autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: .5, stagger: .03, ease: 'expo.out', overwrite: true }); ST.refresh(); }
-    const live = $('#index-live');
-    if (live) live.textContent = `${shown.length} proyectos`;
+    $$('.obras li').forEach(li => { li.hidden = f !== '*' && !li.dataset.tags.split('|').includes(f); });
+    const shown = $$('.obras li:not([hidden])');
+    // Si la franja de filtros ya estaba fija, se vuelve al inicio de la lista filtrada.
+    const tope = $('.obras').getBoundingClientRect().top + scrollY - $('.filtros').offsetHeight - 16;
+    if (scrollY > tope) lenis ? lenis.scrollTo(tope, { immediate: true }) : scrollTo(0, tope);
+    if (fx) { G.fromTo(shown, { y: 24, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: .5, stagger: .03, ease: 'expo.out', overwrite: true, clearProps: 'transform' }); ST.refresh(); }
+    $('#index-live').textContent = `${shown.length} proyectos`;
   }));
-  const preview = $('.preview');
-  if (preview && fine) {
-    const img = $('img', preview);
-    let x = 0, y = 0, tx = 0, ty = 0, raf;
-    const loop = () => {
-      x += (tx - x) * .14; y += (ty - y) * .14;
-      preview.style.transform = `translate(${x + 26}px, ${y - 120}px) rotate(${(tx - x) * .035}deg)`;
-      raf = requestAnimationFrame(loop);
-    };
-    $$('.indice a').forEach(a => {
-      a.addEventListener('pointerenter', () => {
-        if (!a.dataset.img) return;
-        img.src = a.dataset.img;
-        preview.classList.add('is-on');
-        if (!raf) loop();
-      });
-      a.addEventListener('pointerleave', () => preview.classList.remove('is-on'));
-      a.addEventListener('pointermove', e => { tx = e.clientX; ty = e.clientY; });
-    });
-  }
 
-  /* Mesa de juego ---------------------------------------------------------- */
-  const lab = $('.lab');
-  if (lab) {
-    const items = $$('.sticker', lab);
-    const place = () => {
-      const W = lab.clientWidth, H = lab.clientHeight;
-      // Retícula barajada con desorden: reparte los stickers por toda la mesa sin amontonarlos.
-      const vis = items.filter(s => s.offsetWidth);
-      const cols = Math.ceil(Math.sqrt(vis.length * W / H)), rows = Math.ceil(vis.length / cols);
-      const celdas = Array.from({ length: cols * rows }, (_, i) => i).sort(() => Math.random() - .5);
-      vis.forEach((s, k) => {
-        const sz = s.offsetWidth, cw = W / cols, ch = H / rows;
-        s._x = Math.max(0, Math.min(W - sz, (celdas[k] % cols + .5) * cw - sz / 2 + (Math.random() - .5) * cw * .5));
-        s._y = Math.max(0, Math.min(H - sz, (Math.floor(celdas[k] / cols) + .5) * ch - sz / 2 + (Math.random() - .5) * ch * .5));
-        s._r = Math.random() * 40 - 20;
-        if (fx) G.to(s, { x: s._x, y: s._y, rotate: s._r, duration: .9, ease: 'expo.out', delay: k * .012, overwrite: true, onComplete: () => { G.set(s, { clearProps: 'transform' }); s.style.transform = `translate(${s._x}px, ${s._y}px) rotate(${s._r}deg)`; } });
-        else s.style.transform = `translate(${s._x}px, ${s._y}px) rotate(${s._r}deg)`;
-      });
+  /* Mesa de trabajo: el componente, sus controles y su código ---------------- */
+  const banco = $('.banco');
+  if (banco) {
+    const demo = $('.demo', banco), campo = n => $(`[name="${n}"]`, banco);
+    const marcado = n => $(`[name="${n}"]:checked`, banco).value;
+    const euros = n => n.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+    const poner = (attr, k, v) => {
+      const el = $(`[data-${attr}="${k}"]`, banco);
+      if (el.textContent === v) return;
+      el.textContent = v;
+      if (attr !== 'c') return;
+      el.classList.add('cambia');
+      requestAnimationFrame(() => requestAnimationFrame(() => el.classList.remove('cambia')));
     };
-    place();
-    $('[data-revolver]')?.addEventListener('click', place);
-    items.forEach(s => arrastre(s, { limite: (x, y) => [Math.max(-30, Math.min(lab.clientWidth - s.offsetWidth + 30, x)), Math.max(-30, Math.min(lab.clientHeight - s.offsetHeight + 30, y))] }));
-    let rt, w0 = innerWidth;
-    addEventListener('resize', () => { if (innerWidth === w0) return; w0 = innerWidth; clearTimeout(rt); rt = setTimeout(place, 200); });
+    const luz = hex => {
+      const c = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255).map(v => (v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4));
+      return .2126 * c[0] + .7152 * c[1] + .0722 * c[2];
+    };
+    const contraste = (a, b) => { const [x, y] = [luz(a), luz(b)].sort((m, n) => n - m); return (x + .05) / (y + .05); };
+    const pintar = () => {
+      const ingresos = +campo('ingresos').value, gastos = +campo('gastos').value;
+      const oscuro = marcado('tema') === 'oscuro', fondo = oscuro ? '#14171F' : '#FFFFFF', acento = marcado('acento');
+      const radio = campo('radio').value, espacio = marcado('espacio');
+      const set = (k, v) => demo.style.setProperty(k, v);
+      set('--acento', acento); set('--fondo', fondo); set('--radio', `${radio}px`); set('--espacio', `${espacio}px`);
+      set('--rojo', oscuro ? '#FF7A6B' : '#D3201B'); set('--ambar', oscuro ? '#F2B84B' : '#A06600');
+      set('--texto-demo', oscuro ? '#F5F0E6' : '#111014'); set('--linea', oscuro ? 'rgba(245, 240, 230, .14)' : 'rgba(17, 16, 20, .1)');
+      demo.classList.toggle('con-medidas', campo('medidas').checked);
+
+      const filas = { necesidades: [gastos * .58, ingresos * .5], deseos: [gastos * .2, ingresos * .3], ahorro: [gastos * .22, ingresos * .2] };
+      Object.entries(filas).forEach(([k, [gasto, limite]]) => {
+        poner('v', k, euros(gasto));
+        const b = $(`[data-b="${k}"]`, banco);
+        b.style.width = `${Math.min(100, gasto / limite * 100)}%`;
+        b.classList.toggle('excede', k !== 'ahorro' && gasto > limite);
+      });
+      const saldo = ingresos - gastos, excedido = filas.necesidades[0] > filas.necesidades[1];
+      const estado = saldo < 0 ? 'mal' : excedido || filas.deseos[0] > filas.deseos[1] ? 'aviso' : 'ok';
+      const chip = $('.demo-estado', banco);
+      chip.dataset.estado = estado;
+      chip.textContent = { ok: 'Vas bien', aviso: 'Al límite', mal: 'Te pasaste' }[estado];
+      poner('v', 'saldo', euros(saldo));
+      $('[data-v="saldo"]', banco).classList.toggle('es-negativo', saldo < 0);
+      poner('v', 'r-ingresos', euros(ingresos)); poner('v', 'r-gastos', euros(gastos)); poner('v', 'r-radio', `${radio} px`);
+
+      poner('c', 'acento', acento.toUpperCase()); poner('c', 'fondo', fondo); poner('c', 'radio', `${radio}px`); poner('c', 'espacio', `${espacio}px`);
+      poner('c', 'limite', euros(filas.necesidades[1])); poner('c', 'estado', excedido ? "'excedido'" : "'ok'");
+      const r = contraste(acento, fondo);
+      $('[data-contraste]', banco).textContent = `Contraste del acento: ${r.toFixed(1).replace('.', ',')}:1 · ${r >= 4.5 ? 'AA' : 'no llega a AA'}`;
+    };
+    banco.addEventListener('input', pintar);
+    pintar();
   }
 
   /* Barra de lectura ------------------------------------------------------- */

@@ -6,14 +6,14 @@ const I = '/assets/img';
 
 export const perfil = {
   nombre: 'Alejandro Hurtado Martín',
-  rol: 'Diseñador UX/UI · Ilustración · Motion · Copywriting',
+  rol: 'Diseñador UX/UI y desarrollador de producto digital',
   ciudad: 'Caracas, Venezuela',
   email: 'contactoelalquimistadigital@gmail.com',
   whatsapp: '584241891975',
   figma: 'https://www.figma.com/design/rohfqz1wWercy5hoYV0eIc/Portfolio?node-id=1-17985',
 };
 
-export const disciplinas = ['Producto digital', 'UX/UI', 'Diseño gráfico', 'Copywriting', 'Fotografía', 'Motion'];
+export const disciplinas = ['UX/UI', 'Desarrollo', 'Motion', 'Copywriting', 'Diseño gráfico', 'Fotografía'];
 
 export const proyectos = [
   {
@@ -21,7 +21,7 @@ export const proyectos = [
     titulo: 'StickerCom',
     subtitulo: 'Una tienda online completa para vender stickers en Venezuela',
     anio: '2026',
-    disciplinas: ['Producto digital', 'UX/UI', 'Motion'],
+    disciplinas: ['Desarrollo', 'UX/UI', 'Motion'],
     rol: 'Fundador, diseño de producto y desarrollo',
     duracion: 'En evolución continua',
     equipo: 'Proyecto propio, construido con IA como copiloto de código',
@@ -72,7 +72,7 @@ export const proyectos = [
     titulo: 'DiskPulse',
     subtitulo: 'Una app de escritorio para Windows que convierte tu disco en un mapa y te ayuda a decidir qué borrar, sin sustos',
     anio: '2026',
-    disciplinas: ['Producto digital', 'UX/UI'],
+    disciplinas: ['Desarrollo', 'UX/UI'],
     rol: 'Diseño de producto, interfaz y desarrollo',
     duracion: 'Sprint intensivo, del código al instalador',
     equipo: 'Proyecto propio, construido con IA como copiloto de código',
@@ -128,7 +128,7 @@ export const proyectos = [
     titulo: 'Caudal',
     subtitulo: 'Una app de escritorio de finanzas personales que organiza tu dinero mes a mes y te avisa con un color cuando te pasas',
     anio: '2026',
-    disciplinas: ['Producto digital', 'UX/UI'],
+    disciplinas: ['Desarrollo', 'UX/UI'],
     rol: 'Diseño de producto, sistema visual, interfaz y desarrollo',
     duracion: 'Sprint intensivo, del sistema de diseño al instalador',
     equipo: 'Proyecto propio, construido con IA como copiloto de código',
@@ -183,7 +183,7 @@ export const proyectos = [
     titulo: 'Mixing Kit',
     subtitulo: 'Un laboratorio de mixología en 3D: arma cócteles en una barra virtual y mira cómo se llena el vaso en tiempo real',
     anio: '2026',
-    disciplinas: ['Producto digital', 'UX/UI', 'Motion'],
+    disciplinas: ['Desarrollo', 'UX/UI', 'Motion'],
     rol: 'Diseño de producto, interfaz, 3D y desarrollo',
     duracion: 'Sprint intensivo, de la idea a la web publicada',
     equipo: 'Proyecto propio, construido con IA como copiloto de código',
@@ -386,7 +386,7 @@ export const proyectos = [
     titulo: 'LoremCraft → Texto Chimbo',
     subtitulo: 'Un generador de lorem ipsum temático que pasó de Figma a herramienta publicada',
     anio: '2025 — 2026',
-    disciplinas: ['UX/UI', 'Producto digital', 'Copywriting'],
+    disciplinas: ['UX/UI', 'Desarrollo', 'Copywriting'],
     rol: 'Diseño UX/UI, contenido y desarrollo',
     duracion: 'Diseño + construcción en 2 etapas',
     equipo: 'Proyecto propio',
@@ -432,7 +432,7 @@ export const proyectos = [
     titulo: 'BoKditos',
     subtitulo: 'Diseño de tienda móvil y propuesta comercial para un negocio de comida venezolana',
     anio: '2026',
-    disciplinas: ['Producto digital', 'UX/UI', 'Diseño gráfico'],
+    disciplinas: ['Desarrollo', 'UX/UI', 'Diseño gráfico'],
     rol: 'Consultor, diseñador UX/UI y desarrollador',
     duracion: 'Propuesta de 6 semanas',
     equipo: 'Alejandro Hurtado Martín',
@@ -474,7 +474,7 @@ export const proyectos = [
     titulo: 'WaDirecto',
     subtitulo: 'Generador de enlaces de WhatsApp con mensaje, simulador de chat y código QR',
     anio: '2026',
-    disciplinas: ['Producto digital'],
+    disciplinas: ['Desarrollo'],
     rol: 'Diseño y desarrollo',
     duracion: 'Sprint corto',
     equipo: 'Proyecto propio',
@@ -510,7 +510,7 @@ export const proyectos = [
     titulo: 'ROI Express',
     subtitulo: 'Calculadora de ROI y ROAS con reporte PDF para campañas de publicidad',
     anio: '2026',
-    disciplinas: ['Producto digital'],
+    disciplinas: ['Desarrollo'],
     rol: 'Diseño, desarrollo y contenido',
     duracion: 'Sprint corto',
     equipo: 'Proyecto propio',
@@ -553,7 +553,7 @@ export const proyectos = [
     equipo: 'Proyecto propio',
     herramientas: ['Illustrator', 'Photoshop', 'Canva', 'Mockups'],
     portada: `${I}/stickercom/portada-ilustracion.webp`,
-    destacado: true,
+    destacado: false,
     resumen: 'Más de 200 ilustraciones en colecciones de Disney, F1, Friends, Harry Potter, The Big Bang Theory, Travel, Boho y diseños personalizados.',
     intencion: 'Antes de la tienda, StickerCom fue un ejercicio de ilustración: tomar universos que la gente ama y traducirlos a piezas pequeñas, legibles y coleccionables. La intención era que cada pack contara una historia y que en redes se reconociera la marca aunque cambiara la temática.',
     reto: 'Un sticker se ve a 5 cm. Cada ilustración tenía que funcionar diminuta, con bordes de corte limpios, y a la vez convivir con otras en un mismo lienzo de impresión sin desperdiciar material.',
@@ -594,13 +594,13 @@ export const proyectos = [
     titulo: 'StickerCom · Reel y making of',
     subtitulo: 'Un video que enseña a comprar, y otro que cuenta cómo se hizo en una noche',
     anio: '2026',
-    disciplinas: ['Motion', 'Producto digital'],
+    disciplinas: ['Motion'],
     rol: 'Dirección, guion, diseño y animación',
     duracion: 'Una noche',
     equipo: 'Proyecto propio, producido con IA',
     herramientas: ['Animación con código', 'Capturas reales', 'Storyboard', 'Música generada por código'],
     portada: `${I}/stickercom/portada-reel.webp`,
-    destacado: true,
+    destacado: false,
     resumen: 'Dos piezas verticales para redes: el recorrido de compra de la tienda en 49 segundos y su making of en 30.',
     intencion: 'Mucha gente llegaba a la tienda desde Instagram y preguntaba cómo comprar. La intención fue responder con un video en lugar de un párrafo: enseñar el recorrido real paso a paso. Y después contar cómo se hizo, porque el proceso también vende: demuestra que una marca pequeña puede producir piezas de calidad con IA.',
     reto: 'Un video de producto tiene que mostrar la interfaz real sin aburrir. Había que ordenar 58 capturas, dar ritmo, añadir música y terminarlo rápido.',
@@ -886,10 +886,8 @@ export const proyectos = [
 // velocidad de parallax (v). tipo: 'tel' (teléfono), 'pan' (captura con marco) o 'libre' (recorte sin fondo).
 export const estilo = {
   'stickercom-tienda': { bg: '#FFD53D', ink: '#14110A', capas: [
-    { tipo: 'pan', src: `${I}/webs/stickercom-catalogo-desk.webp`, x: 4, y: 12, w: 74, r: -3, v: .5 },
-    { tipo: 'tel', src: `${I}/webs/stickercom-home-movil.webp`, x: 66, y: 30, w: 25, r: 6, v: 1.1 },
-    { tipo: 'libre', src: `${I}/stickers/disney/pelota-pixar.webp`, x: 0, y: 62, w: 20, r: -12, v: 1.6 },
-    { tipo: 'libre', src: `${I}/stickers/friends/friends-19.webp`, x: 40, y: 72, w: 22, r: 8, v: 1.3 },
+    { tipo: 'pan', src: `${I}/webs/stickercom-catalogo-desk.webp`, x: 2, y: 10, w: 80, r: -2, v: .5 },
+    { tipo: 'tel', src: `${I}/webs/stickercom-home-movil.webp`, x: 72, y: 26, w: 25, r: 6, v: 1.1 },
   ] },
   diskpulse: { bg: '#1C0E14', ink: '#FF9A6B', capas: [
     { tipo: 'pan', src: `${I}/diskpulse/mapa.webp`, x: 2, y: 16, w: 86, r: 2, v: .6 },
@@ -913,7 +911,7 @@ export const estilo = {
     { tipo: 'pan', src: `${I}/velvet/recetas-portada.webp`, x: 2, y: 12, w: 78, r: -2, v: .5 },
     { tipo: 'tel', src: `${I}/velvet/recetas-movil-portada.webp`, x: 70, y: 28, w: 26, r: 6, v: 1.2 },
   ] },
-  'stickercom-ilustracion': { bg: '#FF8CC6', ink: '#2A0B1C', capas: [
+  'stickercom-ilustracion': { bg: '#16323F', ink: '#F5F0E6', capas: [
     { tipo: 'libre', src: `${I}/stickers/disney/castillo-disney.webp`, x: 28, y: 6, w: 36, r: -4, v: .7 },
     { tipo: 'libre', src: `${I}/stickers/disney/nemo.webp`, x: 0, y: 8, w: 28, r: -10, v: 1.4 },
     { tipo: 'libre', src: `${I}/stickers/boho/boho-5.webp`, x: 68, y: 2, w: 28, r: 10, v: 1.2 },
