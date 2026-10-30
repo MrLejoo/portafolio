@@ -109,6 +109,9 @@ html.fx .portal-velo { opacity: 0; }
 .capa .phone { width: 100%; max-width: none; padding: 5px; border-radius: 26px; background: var(--tinta); box-shadow: 0 28px 50px -18px rgba(0, 0, 0, .6); }
 .capa .phone-screen { border-radius: 22px; }
 .cartel-pie { position: relative; z-index: 2; }
+/* Degradado del color del cartel: el título conserva el contraste aunque pase sobre una captura. */
+.cartel-pie::before { content: ''; position: absolute; z-index: -1; inset: -7em calc(var(--gutter) * -1) -22px; background: linear-gradient(to top, var(--bg) 52%, color-mix(in srgb, var(--bg) 72%, transparent) 74%, transparent); pointer-events: none; }
+.cartel-pie h3, .cartel-pie small { text-shadow: 0 2px 16px color-mix(in srgb, var(--bg) 70%, transparent); }
 .cartel-pie small { display: block; font: 600 clamp(.85rem, 1.2vw, 1rem)/1.2 var(--display); margin-bottom: 6px; }
 .cartel-pie h3 { font: 800 min(12.5vw, 12.5rem, calc(150vw / var(--n)))/.86 var(--display); font-stretch: 75%; letter-spacing: -.016em; white-space: nowrap; }
 
@@ -117,6 +120,9 @@ html.fx .portal-velo { opacity: 0; }
   html.fx .carril { display: flex; width: max-content; height: 100svh; will-change: transform; }
   html.fx .carril-intro { width: 62vw; min-height: 0; flex: none; }
   html.fx .cartel { width: 84vw; min-height: 0; flex: none; }
+  /* La sección siguiente sube 30px sobre el último cartel: su título no debe quedar debajo. */
+  html.fx .cartel:last-child { padding-bottom: 60px; }
+  html.fx .cartel:last-child .cartel-pie::before { bottom: -60px; }
   html.fx .cartel-escena { min-height: 0; }
 }
 .cartel:hover .cartel-pie h3 { font-style: normal; }
@@ -335,6 +341,7 @@ html.cursor-activo .cursor { display: grid; }
   .cartel-escena { min-height: 58svh; }
   .cartel { position: sticky; top: 0; justify-content: flex-start; gap: 14px; }
   .cartel-pie { order: -1; padding-right: 2.4em; }
+  .cartel-pie::before { display: none; }
   .cartel-pie h3 { font-size: min(19vw, calc(240vw / var(--n))); }
   .capa .phone { border-radius: 16px; padding: 3px; }
   .capa .phone-screen { border-radius: 13px; }
