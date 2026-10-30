@@ -84,7 +84,7 @@
   /* Portada: del póster al muro entrando por la O -------------------------- */
   const hero = $('.hero');
   if (hero && fx) {
-    const nombre = $('.nombre'), portal = $('.portal'), o = $('.o'), pegados = $$('.pegado');
+    const nombre = $('.nombre'), portal = $('.portal'), o = $('.o');
     // El hueco de la O: centro y radios en proporción al tamaño de la letra.
     const K = { cy: .52, rx: .2, ry: .29 };
     let cx, cy, rx, ry;
@@ -103,21 +103,19 @@
       portal.style.clipPath = `ellipse(${rx * zoom.s}px ${ry * zoom.s}px at ${cx}px ${cy}px)`;
     };
     medir(); pintar();
-    ST.addEventListener('refreshInit', () => { medir(); pintar(); });
-    document.fonts?.ready.then(() => { medir(); pintar(); ST.refresh(); });
+    ST.addEventListener('refresh', () => { medir(); pintar(); });
+    // La fuente definitiva cambia el tamaño de la letra: se vuelve a medir cada vez que eso ocurre.
+    let primera = true;
+    new ResizeObserver(() => { medir(); pintar(); if (primera) primera = false; else ST.refresh(); }).observe(o);
 
-    // Entrada: letras que caen y pantallas que aterrizan sobre el póster.
+    // Entrada: letras que caen.
     G.from($$('.l', nombre), { yPercent: 115, duration: 1.1, ease: 'expo.out', stagger: { each: .03, from: 'random' } });
-    G.from(pegados, { scale: 2.1, autoAlpha: 0, rotate: () => G.utils.random(-40, 40), duration: .55, ease: 'back.out(2.4)', stagger: .07, delay: .55 });
     G.from('.hero-nota, .hero-rol', { autoAlpha: 0, duration: .8, delay: 1.5 });
     G.fromTo('.garabato path', { strokeDasharray: 1, strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 1, delay: 1.7, ease: 'power2.inOut' });
 
     const tl = G.timeline({ defaults: { ease: 'none' }, scrollTrigger: { trigger: hero, start: 'top top', end: ancho ? '+=340%' : '+=280%', pin: true, scrub: .5, anticipatePin: 1 } });
     tl.to('.hero-nota, .hero-rol', { autoAlpha: 0, duration: .08 }, 0);
-    pegados.forEach(p => {
-      const r = p.getBoundingClientRect(), dx = r.left + r.width / 2 - innerWidth / 2, dy = r.top + r.height / 2 - innerHeight / 2;
-      tl.to(p, { x: dx * 1.5, y: dy * 1.5, rotate: G.utils.random(-70, 70), autoAlpha: 0, duration: .24, ease: 'power2.in' }, 0);
-    });
+    tl.fromTo('.ui', { autoAlpha: 1, scale: 1 }, { autoAlpha: 0, scale: 1.12, duration: .1 }, 0);
     tl.to(zoom, { s: 70, duration: .5, ease: 'expo.in', onUpdate: pintar }, .04);
     tl.set(nombre, { autoAlpha: 0 }, .55);
     tl.set(portal, { clipPath: 'none' }, .56);
@@ -131,51 +129,40 @@
 
     // Parallax leve de la trama según la profundidad.
     G.to('.hero .trama', { yPercent: -8, scrollTrigger: { trigger: hero, start: 'top top', end: '+=340%', scrub: true } });
-  } else if (hero && !fx) {
-    $$('.pegado').forEach(p => { p.style.position = 'absolute'; });
   }
 
-  if (!fine) { const n = $('.hero-nota span'); if (n) n.textContent = 'desliza hacia abajo'; }
-
-  /* Pantallas que se arrastran (portada) ----------------------------------- */
-  const arrastre = el => {
-    el.addEventListener('pointerdown', e => {
-      if (e.pointerType === 'touch') return;
-      e.preventDefault();
-      el.setPointerCapture(e.pointerId);
-      el.classList.add('is-drag');
-      el.style.zIndex = ++arrastre.z;
-      el._x ??= 0; el._y ??= 0; el._r ??= 0;
-      const ox = e.clientX - el._x, oy = e.clientY - el._y;
-      let lx = e.clientX, vx = 0;
-      const move = ev => {
-        vx = ev.clientX - lx; lx = ev.clientX;
-        const x = ev.clientX - ox, y = ev.clientY - oy;
-        el._x = x; el._y = y;
-        el.style.transform = `translate(${x}px, ${y}px) rotate(${el._r + vx * .9}deg)`;
-      };
-      const up = () => {
-        el.classList.remove('is-drag');
-        el._r += vx * .9;
-        el.style.transform = `translate(${el._x}px, ${el._y}px) rotate(${el._r}deg)`;
-        el.removeEventListener('pointermove', move);
-        el.removeEventListener('pointerup', up);
-        el.removeEventListener('pointercancel', up);
-      };
-      el.addEventListener('pointermove', move);
-      el.addEventListener('pointerup', up);
-      el.addEventListener('pointercancel', up);
-    });
-  };
-  arrastre.z = 5;
-  // Un envoltorio interior evita pelearse con los transform de GSAP en la pieza de portada.
-  if (fine) $$('.pegado').forEach(p => {
-    const inner = document.createElement('div');
-    inner.className = 'pegado-in';
-    inner.append(...p.childNodes);
-    p.append(inner);
-    arrastre(inner);
-  });
+  /* Portada: el nombre como elemento en edición, en diseño y en código ------ */
+  const ui = $('.ui');
+  if (ui) {
+    const sel = $('.sel', ui), medida = $('.sel-medida', ui), dedo = $('.puntero--diseno', ui), texto = $('[data-fila]', ui);
+    const filas = $$('.fila');
+    let actual = 1, encima = false;
+    const marcar = i => {
+      actual = i;
+      const l = $$('.l', filas[i]), h = hero.getBoundingClientRect(), f = filas[i].getBoundingClientRect();
+      const x = l[0].getBoundingClientRect().left - h.left - 8, w = l[l.length - 1].getBoundingClientRect().right - h.left + 8 - x;
+      const y = f.top - h.top, alto = f.height;
+      Object.assign(sel.style, { left: `${x}px`, top: `${y}px`, width: `${w}px`, height: `${alto}px` });
+      dedo.style.left = `${Math.min(x + w - 4, innerWidth - 96)}px`;
+      dedo.style.top = `${y + alto - 4}px`;
+      medida.textContent = `${Math.round(w)} × ${Math.round(alto)}`;
+      texto.textContent = l.map(c => c.textContent).join('');
+      ui.classList.add('listo');
+    };
+    // Solo se recoloca con la portada en reposo: durante la entrada por la O el nombre está escalado.
+    const enReposo = () => scrollY < 40;
+    new ResizeObserver(() => { if (enReposo()) marcar(actual); }).observe($('.o'));
+    if (fx) setInterval(() => { if (!encima && enReposo()) marcar((actual + 1) % filas.length); }, 3000);
+    if (fine) {
+      hero.addEventListener('pointermove', e => {
+        encima = true;
+        const i = filas.findIndex(f => e.clientY < f.getBoundingClientRect().bottom);
+        if (i >= 0 && i !== actual && enReposo()) marcar(i);
+      });
+      hero.addEventListener('pointerleave', () => { encima = false; });
+    }
+    if (fx) G.to('.puntero--codigo', { x: 9, y: -7, duration: 1.5, ease: 'sine.inOut', yoyo: true, repeat: -1 });
+  }
 
   /* Carteles: scroll horizontal en escritorio, pila en móvil --------------- */
   const carril = $('.carril');

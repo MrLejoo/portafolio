@@ -57,6 +57,7 @@ function img(src, { alt = '', lazy = true, priority = false, extra = '' } = {}) 
 const ico = {
   arrow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
   play: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>',
+  puntero: '<svg viewBox="0 0 20 22" aria-hidden="true"><path fill="currentColor" stroke="#111014" stroke-width="1.4" stroke-linejoin="round" d="M2 1.5 17.5 10l-6.8 2.1L7 19z"/></svg>',
   close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>',
   flecha: '<svg class="garabato" viewBox="0 0 120 70" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path pathLength="1" d="M4 12c22 34 58 44 104 30M92 26l17 16-21 12"/></svg>',
 };
@@ -230,15 +231,6 @@ function home() {
   const orden = ['caudal', 'diskpulse', 'mixing-kit', 'stickercom-tienda', 'wander', 'velvet-spirit', 'reaccionar-vs-responder'];
   const destacados = orden.map(s => bySlug[s]);
   const I = '/assets/img';
-  const piezas = [
-    ['libre', `${I}/caudal/icono.webp`, 90, 7, 7, -9],
-    ['pan', `${I}/caudal/resumen-oscuro.webp`, 70, 8, 18, 5],
-    ['tel', `${I}/wander/pantalla-explorar.webp`, 5, 34, 8, -7],
-    ['pan', `${I}/mixingkit/sunrise.webp`, 17, 40, 18, 4],
-    ['pan', `${I}/diskpulse/mapa.webp`, 54, 69, 20, -4],
-    ['libre', `${I}/diskpulse/icono.webp`, 77, 74, 7.5, 11],
-    ['tel', `${I}/velvet/recetas-movil-portada.webp`, 88, 66, 7, 6],
-  ];
   const muro = [
     [`${I}/caudal/resumen.webp`, `${I}/wander/pantalla-explorar.webp`, `${I}/diskpulse/mapa.webp`, `${I}/velvet/recetas-portada.webp`],
     [`${I}/mixingkit/sunrise.webp`, `${I}/webs/stickercom-home-desk.webp`, `${I}/velvet/recetas-movil-portada.webp`, `${I}/caudal/seguimiento.webp`],
@@ -247,10 +239,6 @@ function home() {
   ];
   const abanico = [`${I}/webs/roiexpress-desk.webp`, `${I}/ui/checkout-process.webp`, `${I}/bokditos/portada.webp`, `${I}/webs/wadirecto-desk.webp`, `${I}/loremcraft/web-portada.webp`];
   const con = d => proyectos.filter(p => p.disciplinas.includes(d)).length;
-  const pieza = ([tipo, s, x, y, w, r]) => {
-    const foto = img(s, { lazy: false, extra: ' draggable="false"' });
-    return `<div class="pegado pegado--${tipo}" data-cursor="Arrastra" style="--x:${x};--y:${y};--w:${w};--r:${r}deg">${tipo === 'tel' ? `<div class="phone"><div class="phone-screen">${foto}</div></div>` : foto}</div>`;
-  };
 
   const body = `
 <section class="hero scene" data-scene="hero" aria-label="Portada">
@@ -268,11 +256,18 @@ function home() {
     <span class="fila fila--3" aria-hidden="true">${letras('MARTÍN')}</span>
   </h1>
 
-  <div class="pegados layer depth-5" data-depth="5" aria-hidden="true">
-    ${piezas.map(pieza).join('')}
+  <div class="ui layer depth-5" data-depth="5" aria-hidden="true">
+    <div class="sel"><i></i><i></i><i></i><i></i><span class="sel-medida"></span></div>
+    <div class="puntero puntero--diseno">${ico.puntero}<span>Diseño</span></div>
+    <div class="inspector">
+<pre><code>&lt;h1 class="nombre"&gt;
+  &lt;span&gt;<b data-fila>HURTADO</b>&lt;/span&gt;
+&lt;/h1&gt;</code></pre>
+      <div class="puntero puntero--codigo">${ico.puntero}<span>Código</span></div>
+    </div>
   </div>
 
-  <p class="hero-nota"><span>arrastra las pantallas</span>${ico.flecha}</p>
+  <p class="hero-nota"><span>baja y entra por la O</span>${ico.flecha}</p>
   <p class="hero-rol">${esc(perfil.rol)}</p>
 </section>
 

@@ -12,6 +12,7 @@
   --serif: 'Instrument Serif', Georgia, serif;
   --mano: 'Caveat', 'Segoe Print', cursive;
   --texto: 'Inter', system-ui, sans-serif;
+  --mono: ui-monospace, 'Cascadia Code', Consolas, monospace;
   --gutter: clamp(16px, 3vw, 44px);
   --ease: cubic-bezier(.16, 1, .3, 1);
 }
@@ -68,13 +69,26 @@ em { font-family: var(--serif); font-style: italic; font-weight: 400; letter-spa
 .fila--2 { text-align: right; }
 .fila--3 { text-align: left; }
 .l { display: inline-block; }
-.pegados { position: absolute; inset: 0 0 auto; height: 100svh; }
-.pegado { position: absolute; left: calc(var(--x) * 1%); top: calc(var(--y) * 1%); width: calc(var(--w) * 1vw); rotate: var(--r); cursor: grab; touch-action: pan-y; }
-.pegado img { width: 100%; pointer-events: none; }
-.pegado--libre img { filter: drop-shadow(0 10px 14px rgba(0, 0, 0, .35)); }
-.pegado--pan img { border-radius: 8px; box-shadow: 0 22px 40px -14px rgba(0, 0, 0, .6); }
-.pegado .phone { width: 100%; padding: 4px; border-radius: 20px; }
-.pegado .phone-screen { border-radius: 16px; }
+.ui { position: absolute; inset: 0 0 auto; height: 100svh; pointer-events: none; opacity: 0; }
+.ui.listo { opacity: 1; }
+/* Selección de editor sobre el nombre; left, top, width y height los pone main.js con medidas reales. */
+.sel { position: absolute; box-shadow: 0 0 0 1.5px var(--limon); transition: left .55s var(--ease), top .55s var(--ease), width .55s var(--ease), height .55s var(--ease); }
+.sel i { position: absolute; width: 11px; height: 11px; margin: -5.5px; background: var(--papel); box-shadow: 0 0 0 1.5px var(--limon); }
+.sel i:nth-child(2) { left: 100%; }
+.sel i:nth-child(3) { top: 100%; }
+.sel i:nth-child(4) { left: 100%; top: 100%; }
+.sel-medida { position: absolute; left: 50%; top: 100%; translate: -50% 8px; padding: 3px 7px; border-radius: 4px; background: var(--limon); color: var(--tinta); font: 600 .78rem/1 var(--mono); white-space: nowrap; }
+.puntero { position: absolute; display: flex; align-items: flex-start; pointer-events: none; }
+.puntero svg { width: 19px; flex: none; }
+.puntero span { margin: 15px 0 0 -3px; padding: 4px 8px; border-radius: 4px 10px 10px 10px; font: 600 .8rem/1 var(--texto); color: var(--tinta); }
+.puntero--diseno { color: var(--limon); transition: left .55s var(--ease), top .55s var(--ease); }
+.puntero--diseno span { background: var(--limon); }
+.puntero--codigo { right: -18px; top: 62%; color: var(--tomate); }
+.puntero--codigo span { background: var(--tomate); }
+.inspector { position: absolute; right: var(--gutter); top: 70%; padding: 15px 20px; border-radius: 12px; background: var(--tinta); box-shadow: 0 24px 44px -18px rgba(0, 0, 0, .6); }
+.inspector pre { margin: 0; }
+.inspector code { font: 400 clamp(.82rem, 1.15vw, 1rem)/1.6 var(--mono); color: var(--papel); }
+.inspector b { font-weight: 600; color: var(--limon); }
 .hero-nota { position: absolute; left: var(--gutter); top: calc(100svh - 58px); display: flex; align-items: flex-end; gap: 8px; font: 600 clamp(1.6rem, 2.4vw, 2.2rem)/1 var(--mano); color: var(--limon); }
 .garabato { width: 66px; rotate: -8deg; }
 .hero-rol { position: absolute; right: var(--gutter); top: calc(100svh - 38px); font: 600 clamp(.85rem, 1.1vw, 1rem)/1.2 var(--display); text-align: right; }
@@ -89,7 +103,7 @@ em { font-family: var(--serif); font-style: italic; font-weight: 400; letter-spa
 
 html.fx .hero { height: 100svh; }
 html.fx .nombre { position: absolute; inset: 0; z-index: 2; }
-html.fx .pegados { z-index: 3; }
+html.fx .ui { z-index: 3; }
 html.fx .hero-nota, html.fx .hero-rol { z-index: 3; }
 html.fx .portal { position: absolute; inset: 0; z-index: 2; }
 html.fx .portal-frase { visibility: hidden; }
@@ -198,7 +212,7 @@ html.fx .portal-frase { visibility: hidden; }
 .lienzo-pie a { display: inline-flex; align-items: center; gap: .4em; color: var(--limon); font-weight: 600; }
 .lienzo-pie svg { width: 1.05em; }
 .banco-codigo pre { margin: 0; overflow-x: auto; }
-.banco-codigo code { font: 400 .84rem/1.65 ui-monospace, 'Cascadia Code', Consolas, monospace; color: #E9E5DC; }
+.banco-codigo code { font: 400 .84rem/1.65 var(--mono); color: #E9E5DC; }
 .banco-codigo i { font-style: normal; color: #B8A6FF; }
 .banco-codigo b { font-weight: 400; color: var(--limon); }
 .banco-codigo u { text-decoration: none; color: rgba(245, 240, 230, .55); }
@@ -374,14 +388,8 @@ html.cursor-activo .cursor { display: grid; }
   .fila--1 { font-size: 25.6vw; }
   .fila--2 { font-size: 31.4vw; text-align: left; }
   .fila--3 { font-size: 36.4vw; }
-  .pegado { width: calc(var(--w) * 2.1vw); }
-  .pegado:nth-child(n+7) { display: none; }
-  .pegado:nth-child(1) { left: 76%; top: 10%; }
-  .pegado:nth-child(2) { left: 5%; top: 9%; }
-  .pegado:nth-child(3) { left: 5%; top: 67%; }
-  .pegado:nth-child(4) { left: 60%; top: 68%; }
-  .pegado:nth-child(5) { left: 26%; top: 75%; }
-  .pegado:nth-child(6) { left: 54%; top: 17%; }
+  .inspector { right: auto; left: var(--gutter); top: 11svh; padding: 11px 15px; }
+  .puntero--codigo { right: -46px; }
   .hero-rol { left: var(--gutter); right: auto; top: calc(100svh - 84px); text-align: left; }
   .muro { grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .muro-col:nth-child(4) { display: none; }
