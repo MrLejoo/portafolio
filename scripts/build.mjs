@@ -96,6 +96,7 @@ ${body}
 </main>
 ${footer()}
 <div class="cursor" aria-hidden="true"><span></span></div>
+<button class="anim-btn" type="button" hidden>Activar animaciones</button>
 <script src="${JS_URL}" defer></script>
 </body>
 </html>`;

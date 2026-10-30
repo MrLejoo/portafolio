@@ -3,7 +3,12 @@
 (() => {
   const $ = (s, c = document) => c.querySelector(s);
   const $$ = (s, c = document) => [...c.querySelectorAll(s)];
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const pideQuietud = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Quien tiene las animaciones reducidas ve la versión estática, pero puede activarlas con un botón.
+  const leerPreferencia = () => { try { return localStorage.getItem('animaciones'); } catch { return null; } };
+  const guardarPreferencia = v => { try { v ? localStorage.setItem('animaciones', v) : localStorage.removeItem('animaciones'); } catch { /* sin almacenamiento: dura hasta recargar */ } };
+  const forzado = pideQuietud && leerPreferencia() === 'si';
+  const reduce = pideQuietud && !forzado;
   const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
   const ancho = matchMedia('(min-width: 900px)').matches;
   const root = document.documentElement;
@@ -374,6 +379,18 @@
       cursor.classList.toggle('is-on', !!t);
       if (t) txt.textContent = t.dataset.cursor;
     });
+  }
+
+  /* Botón para activar o quitar las animaciones ---------------------------- */
+  const animBtn = $('.anim-btn');
+  if (animBtn && pideQuietud) {
+    animBtn.hidden = false;
+    if (forzado) {
+      animBtn.textContent = 'Quitar animaciones';
+      animBtn.classList.add('anim-btn--pie');
+      $('.footer')?.append(animBtn);
+    }
+    animBtn.addEventListener('click', () => { guardarPreferencia(forzado ? null : 'si'); location.reload(); });
   }
 
   /* Año del pie */
