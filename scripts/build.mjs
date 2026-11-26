@@ -227,15 +227,20 @@ function mesa() {
 </section>`;
 }
 
+const ORDEN_DESTACADOS = ['alza', 'caudal', 'bokditos', 'stickercom-tienda', 'wander', 'orus', 'diskpulse', 'mixing-kit', 'tutorial-studio', 'p2p-desk'];
+const proyectosOrdenados = [
+  ...ORDEN_DESTACADOS.map(s => bySlug[s]).filter(Boolean),
+  ...proyectos.filter(p => !ORDEN_DESTACADOS.includes(p.slug)),
+];
+
 function home() {
-  const orden = ['orus', 'caudal', 'p2p-desk', 'tutorial-studio', 'mixing-kit', 'diskpulse', 'stickercom-tienda', 'wander'];
-  const destacados = orden.map(s => bySlug[s]);
+  const destacados = ORDEN_DESTACADOS.map(s => bySlug[s]).filter(Boolean);
   const I = '/assets/img';
   const muro = [
-    [`${I}/orus/inicio-desk.webp`, `${I}/caudal/resumen-oscuro.webp`, `${I}/diskpulse/mapa.webp`, `${I}/velvet/recetas-portada.webp`],
-    [`${I}/p2pdesk/mesa-oscuro.webp`, `${I}/mixingkit/sunrise.webp`, `${I}/webs/stickercom-home-desk.webp`, `${I}/caudal/seguimiento.webp`],
-    [`${I}/tutorial-studio/editor.webp`, `${I}/wander/pantalla-perfil.webp`, `${I}/webs/roiexpress-desk.webp`, `${I}/mixingkit/portada.webp`],
-    [`${I}/orus/admin-resumen.webp`, `${I}/caudal/resumen-claro.webp`, `${I}/mixingkit/movil-coctel.webp`, `${I}/velvet/mi-bar-portada.webp`],
+    [`${I}/alza/inicio-desk.webp`, `${I}/caudal/resumen-oscuro.webp`, `${I}/diskpulse/mapa.webp`, `${I}/velvet/recetas-portada.webp`],
+    [`${I}/bokditos/inicio-desk.webp`, `${I}/orus/inicio-desk.webp`, `${I}/webs/stickercom-home-desk.webp`, `${I}/caudal/seguimiento.webp`],
+    [`${I}/tutorial-studio/editor.webp`, `${I}/p2pdesk/mesa-oscuro.webp`, `${I}/wander/pantalla-perfil.webp`, `${I}/mixingkit/portada.webp`],
+    [`${I}/alza/admin-panel.webp`, `${I}/caudal/resumen-claro.webp`, `${I}/mixingkit/movil-coctel.webp`, `${I}/orus/admin-resumen.webp`],
   ];
   const abanico = [`${I}/webs/roiexpress-desk.webp`, `${I}/ui/checkout-process.webp`, `${I}/bokditos/portada.webp`, `${I}/webs/wadirecto-desk.webp`, `${I}/loremcraft/web-portada.webp`];
   const con = d => proyectos.filter(p => p.disciplinas.includes(d)).length;
@@ -336,9 +341,12 @@ ${mesa()}
 /* Proyectos ------------------------------------------------------------- */
 function catalogo() {
   const counts = Object.fromEntries(disciplinas.map(d => [d, proyectos.filter(p => p.disciplinas.includes(d)).length]));
-  // Primero el producto: UX/UI y desarrollo pesan igual; después, cada disciplina en su orden.
-  const peso = p => Math.max(1, Math.min(...p.disciplinas.map(d => disciplinas.indexOf(d))));
-  const lista = [...proyectos].sort((a, b) => peso(a) - peso(b));
+  // Primero los 10 proyectos principales en su orden exacto; después, el resto por disciplina.
+  const peso = p => {
+    const idx = ORDEN_DESTACADOS.indexOf(p.slug);
+    return idx >= 0 ? idx : 100 + Math.max(1, Math.min(...p.disciplinas.map(d => disciplinas.indexOf(d))));
+  };
+  const lista = [...proyectosOrdenados].sort((a, b) => peso(a) - peso(b));
 
   const body = `
 <section class="catalogo" aria-label="Proyectos">
@@ -417,7 +425,7 @@ function gallery(p) {
 
 /* Página de proyecto ---------------------------------------------------- */
 function projectPage(p, i) {
-  const next = proyectos[(i + 1) % proyectos.length];
+  const next = proyectosOrdenados[(i + 1) % proyectosOrdenados.length];
   const c = coverOf(p);
   const t = tono(p), tn = tono(next);
   const cifras = p.metricas.length && p.galeria[0].tipo !== 'insights';
@@ -505,7 +513,7 @@ const PRELOAD_FONTS = readdirSync(join(SRC, 'assets/fonts'))
   .map(f => `<link rel="preload" href="/assets/fonts/${f}" as="font" type="font/woff2" crossorigin>`).join('\n');
 write('index.html', home());
 write('proyectos/index.html', catalogo());
-proyectos.forEach((p, i) => {
+proyectosOrdenados.forEach((p, i) => {
   p.relacionados?.forEach(r => { if (!bySlug[r]) console.warn(`! ${p.slug}: relacionado inexistente "${r}"`); });
   write(`proyectos/${p.slug}/index.html`, projectPage(p, i));
 });
