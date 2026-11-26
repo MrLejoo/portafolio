@@ -228,14 +228,14 @@ function mesa() {
 }
 
 function home() {
-  const orden = ['caudal', 'diskpulse', 'mixing-kit', 'stickercom-tienda', 'wander', 'velvet-spirit', 'reaccionar-vs-responder'];
+  const orden = ['orus', 'caudal', 'p2p-desk', 'tutorial-studio', 'mixing-kit', 'diskpulse', 'stickercom-tienda', 'wander'];
   const destacados = orden.map(s => bySlug[s]);
   const I = '/assets/img';
   const muro = [
-    [`${I}/caudal/resumen.webp`, `${I}/wander/pantalla-explorar.webp`, `${I}/diskpulse/mapa.webp`, `${I}/velvet/recetas-portada.webp`],
-    [`${I}/mixingkit/sunrise.webp`, `${I}/webs/stickercom-home-desk.webp`, `${I}/velvet/recetas-movil-portada.webp`, `${I}/caudal/seguimiento.webp`],
-    [`${I}/diskpulse/paleta.webp`, `${I}/wander/pantalla-perfil.webp`, `${I}/webs/roiexpress-desk.webp`, `${I}/mixingkit/portada.webp`],
-    [`${I}/webs/wadirecto-desk.webp`, `${I}/caudal/resumen-oscuro.webp`, `${I}/mixingkit/movil-coctel.webp`, `${I}/velvet/mi-bar-portada.webp`],
+    [`${I}/orus/inicio-desk.webp`, `${I}/caudal/resumen-oscuro.webp`, `${I}/diskpulse/mapa.webp`, `${I}/velvet/recetas-portada.webp`],
+    [`${I}/p2pdesk/mesa-oscuro.webp`, `${I}/mixingkit/sunrise.webp`, `${I}/webs/stickercom-home-desk.webp`, `${I}/caudal/seguimiento.webp`],
+    [`${I}/tutorial-studio/editor.webp`, `${I}/wander/pantalla-perfil.webp`, `${I}/webs/roiexpress-desk.webp`, `${I}/mixingkit/portada.webp`],
+    [`${I}/orus/admin-resumen.webp`, `${I}/caudal/resumen-claro.webp`, `${I}/mixingkit/movil-coctel.webp`, `${I}/velvet/mi-bar-portada.webp`],
   ];
   const abanico = [`${I}/webs/roiexpress-desk.webp`, `${I}/ui/checkout-process.webp`, `${I}/bokditos/portada.webp`, `${I}/webs/wadirecto-desk.webp`, `${I}/loremcraft/web-portada.webp`];
   const con = d => proyectos.filter(p => p.disciplinas.includes(d)).length;
@@ -306,7 +306,7 @@ ${mesa()}
     </div>
     <div class="oficios">
       <div class="rv"><h3>UX/UI</h3><p>Investigación con usuarios, prototipado, sistemas de diseño, Figma</p></div>
-      <div class="rv"><h3>Desarrollo</h3><p>JavaScript, Python, Supabase, Three.js, Cloudflare</p></div>
+      <div class="rv"><h3>Desarrollo</h3><p>JavaScript, Python, Electron, Supabase, Three.js, Cloudflare</p></div>
       <div class="rv"><h3>Además</h3><p>Motion, copywriting, ilustración, fotografía</p></div>
     </div>
   </div>
@@ -472,6 +472,7 @@ ${cifras ? `<section class="c-cifras" style="--bg:${t.bg};--ink:${t.ink}" aria-l
     title: `${p.titulo} · ${perfil.nombre}`,
     description: p.resumen,
     path: `/proyectos/${p.slug}/`,
+    image: p.portada,
     body,
     bodyClass: 'caso',
     bg: t.bg,
